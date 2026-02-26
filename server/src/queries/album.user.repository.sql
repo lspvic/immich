@@ -18,6 +18,21 @@ where
   "userId" = $2
   and "albumId" = $3
 
+-- AlbumUserRepository.update (withShowInTimeline)
+update "album_user"
+set
+  "showInTimeline" = $1
+where
+  "userId" = $2
+  and "albumId" = $3
+
+-- AlbumUserRepository.update (withShowInTimeline) - album_asset updateId bump
+update "album_asset"
+set
+  "updateId" = immich_uuid_v7 ()
+where
+  "albumId" = $1
+
 -- AlbumUserRepository.delete
 delete from "album_user"
 where

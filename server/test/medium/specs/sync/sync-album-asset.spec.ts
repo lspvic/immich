@@ -1,5 +1,6 @@
 import { Kysely } from 'kysely';
 import { AlbumUserRole, SyncEntityType, SyncRequestType } from 'src/enum';
+import { AlbumUserRepository } from 'src/repositories/album-user.repository';
 import { AssetRepository } from 'src/repositories/asset.repository';
 import { DB } from 'src/schema';
 import { SyncTestContext } from 'test/medium.factory';
@@ -418,5 +419,85 @@ describe(SyncRequestType.AlbumAssetsV1, () => {
       },
       expect.objectContaining({ type: SyncEntityType.SyncCompleteV1 }),
     ]);
+  });
+
+  it('should re-sync album asset with spoofed ownerId when showInTimeline changes to true after initial sync', async () => {
+    const { auth, ctx } = await setup();
+    const { user: user2 } = await ctx.newUser();
+    const { asset } = await ctx.newAsset({ ownerId: user2.id });
+    const { album } = await ctx.newAlbum({ ownerId: user2.id });
+    await ctx.newAlbumAsset({ albumId: album.id, assetId: asset.id });
+    // Initially showInTimeline=false
+    await ctx.newAlbumUser({ albumId: album.id, userId: auth.user.id, role: AlbumUserRole.Editor, showInTimeline: false });
+
+    // First sync: asset is stored with real ownerId (user2)
+    const firstResponse = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(firstResponse).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          data: expect.objectContaining({ id: asset.id, ownerId: user2.id }),
+          type: SyncEntityType.AlbumAssetCreateV1,
+        }),
+      ]),
+    );
+    await ctx.syncAckAll(auth, firstResponse);
+
+    // Now change showInTimeline to true
+    const albumUserRepository = ctx.get(AlbumUserRepository);
+    await albumUserRepository.update({ albumId: album.id, userId: auth.user.id }, { showInTimeline: true });
+
+    // Second sync: asset should be re-sent with spoofed ownerId
+    const secondResponse = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(secondResponse).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          data: expect.objectContaining({
+            id: asset.id,
+            ownerId: auth.user.id, // ownerId is spoofed to the requesting user
+          }),
+          type: SyncEntityType.AlbumAssetCreateV1,
+        }),
+      ]),
+    );
+  });
+
+  it('should re-sync album asset with real ownerId when showInTimeline changes to false after initial sync', async () => {
+    const { auth, ctx } = await setup();
+    const { user: user2 } = await ctx.newUser();
+    const { asset } = await ctx.newAsset({ ownerId: user2.id });
+    const { album } = await ctx.newAlbum({ ownerId: user2.id });
+    await ctx.newAlbumAsset({ albumId: album.id, assetId: asset.id });
+    // Initially showInTimeline=true
+    await ctx.newAlbumUser({ albumId: album.id, userId: auth.user.id, role: AlbumUserRole.Editor, showInTimeline: true });
+
+    // First sync: asset is stored with spoofed ownerId
+    const firstResponse = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(firstResponse).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          data: expect.objectContaining({ id: asset.id, ownerId: auth.user.id }),
+          type: SyncEntityType.AlbumAssetCreateV1,
+        }),
+      ]),
+    );
+    await ctx.syncAckAll(auth, firstResponse);
+
+    // Now change showInTimeline to false
+    const albumUserRepository = ctx.get(AlbumUserRepository);
+    await albumUserRepository.update({ albumId: album.id, userId: auth.user.id }, { showInTimeline: false });
+
+    // Second sync: asset should be re-sent with real ownerId (user2)
+    const secondResponse = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(secondResponse).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          data: expect.objectContaining({
+            id: asset.id,
+            ownerId: user2.id, // real ownerId restored
+          }),
+          type: SyncEntityType.AlbumAssetCreateV1,
+        }),
+      ]),
+    );
   });
 });

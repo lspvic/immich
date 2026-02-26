@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Insertable, Kysely, Updateable } from 'kysely';
+import { Insertable, Kysely, Updateable, sql } from 'kysely';
 import { InjectKysely } from 'nestjs-kysely';
 import { DummyValue, GenerateSql } from 'src/decorators';
 import { AlbumUserRole } from 'src/enum';
@@ -24,7 +24,10 @@ export class AlbumUserRepository {
       .executeTakeFirstOrThrow();
   }
 
-  @GenerateSql({ params: [{ userId: DummyValue.UUID, albumId: DummyValue.UUID }, { role: AlbumUserRole.Viewer }] })
+  @GenerateSql(
+    { params: [{ userId: DummyValue.UUID, albumId: DummyValue.UUID }, { role: AlbumUserRole.Viewer }] },
+    { params: [{ userId: DummyValue.UUID, albumId: DummyValue.UUID }, { showInTimeline: true }], name: 'withShowInTimeline' },
+  )
   async update({ userId, albumId }: AlbumPermissionId, dto: Updateable<AlbumUserTable>) {
     await this.db
       .updateTable('album_user')
@@ -32,6 +35,17 @@ export class AlbumUserRepository {
       .where('userId', '=', userId)
       .where('albumId', '=', albumId)
       .execute();
+
+    // When showInTimeline changes, force re-sync of all album assets by bumping their updateId.
+    // Without this, mobile clients that already synced the album assets would keep stale ownerId values
+    // because the sync engine only re-sends assets whose album_asset.updateId has changed.
+    if (dto.showInTimeline !== undefined) {
+      await this.db
+        .updateTable('album_asset')
+        .set({ updateId: sql`immich_uuid_v7()` })
+        .where('albumId', '=', albumId)
+        .execute();
+    }
   }
 
   @GenerateSql({ params: [DummyValue.UUID] })
