@@ -15,6 +15,7 @@ class SyncAlbumUserV1 {
   SyncAlbumUserV1({
     required this.albumId,
     required this.role,
+    required this.showInTimeline,
     required this.userId,
   });
 
@@ -24,6 +25,9 @@ class SyncAlbumUserV1 {
   /// Album user role
   AlbumUserRole role;
 
+  /// Show shared album assets in timeline
+  bool showInTimeline;
+
   /// User ID
   String userId;
 
@@ -31,6 +35,7 @@ class SyncAlbumUserV1 {
   bool operator ==(Object other) => identical(this, other) || other is SyncAlbumUserV1 &&
     other.albumId == albumId &&
     other.role == role &&
+    other.showInTimeline == showInTimeline &&
     other.userId == userId;
 
   @override
@@ -38,15 +43,17 @@ class SyncAlbumUserV1 {
     // ignore: unnecessary_parenthesis
     (albumId.hashCode) +
     (role.hashCode) +
+    (showInTimeline.hashCode) +
     (userId.hashCode);
 
   @override
-  String toString() => 'SyncAlbumUserV1[albumId=$albumId, role=$role, userId=$userId]';
+  String toString() => 'SyncAlbumUserV1[albumId=$albumId, role=$role, showInTimeline=$showInTimeline, userId=$userId]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'albumId'] = this.albumId;
       json[r'role'] = this.role;
+      json[r'showInTimeline'] = this.showInTimeline;
       json[r'userId'] = this.userId;
     return json;
   }
@@ -62,6 +69,7 @@ class SyncAlbumUserV1 {
       return SyncAlbumUserV1(
         albumId: mapValueOfType<String>(json, r'albumId')!,
         role: AlbumUserRole.fromJson(json[r'role'])!,
+        showInTimeline: mapValueOfType<bool>(json, r'showInTimeline')!,
         userId: mapValueOfType<String>(json, r'userId')!,
       );
     }
@@ -112,6 +120,7 @@ class SyncAlbumUserV1 {
   static const requiredKeys = <String>{
     'albumId',
     'role',
+    'showInTimeline',
     'userId',
   };
 }

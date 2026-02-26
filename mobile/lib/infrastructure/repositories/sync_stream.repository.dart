@@ -383,7 +383,10 @@ class SyncStreamRepository extends DriftDatabaseRepository {
     try {
       await _db.batch((batch) {
         for (final album in data) {
-          final companion = RemoteAlbumUserEntityCompanion(role: Value(album.role.toAlbumUserRole()));
+          final companion = RemoteAlbumUserEntityCompanion(
+            role: Value(album.role.toAlbumUserRole()),
+            showInTimeline: Value(album.showInTimeline),
+          );
 
           batch.insert(
             _db.remoteAlbumUserEntity,
