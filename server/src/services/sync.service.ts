@@ -554,6 +554,8 @@ export class SyncService extends BaseService {
 
     const creates = this.syncRepository.albumAsset.getCreates({ ...options, ack: createCheckpoint });
     let first = true;
+    let spoofedCount = 0;
+    let totalCount = 0;
     for await (const { updateId, showInTimeline, ...data } of creates) {
       if (first) {
         send(response, {
@@ -564,11 +566,18 @@ export class SyncService extends BaseService {
         });
         first = false;
       }
+      totalCount++;
       const asset = mapSyncAssetV1(data);
       if (showInTimeline && asset.ownerId !== options.userId) {
         asset.ownerId = options.userId;
+        spoofedCount++;
       }
       send(response, { type: createType, ids: [updateId], data: asset });
+    }
+    if (totalCount > 0) {
+      this.logger.debug(
+        `[AlbumAssets] Sent ${totalCount} album asset create(s) for user ${options.userId}, ${spoofedCount} with spoofed ownerId (showInTimeline=true)`,
+      );
     }
   }
 
