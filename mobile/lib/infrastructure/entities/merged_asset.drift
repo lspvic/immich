@@ -72,6 +72,7 @@ LEFT JOIN
 	stack_entity se ON rae.stack_id = se.id
 WHERE
 	rae.deleted_at IS NULL
+	AND rae.visibility = 0
 	AND rae.owner_id NOT IN :user_ids
 	AND (
 		rae.stack_id IS NULL
@@ -174,6 +175,7 @@ FROM
 		stack_entity se ON rae.stack_id = se.id
 	WHERE
 		rae.deleted_at IS NULL
+		AND rae.visibility = 0
 		AND rae.owner_id NOT IN :user_ids
 		AND (
 			rae.stack_id IS NULL
