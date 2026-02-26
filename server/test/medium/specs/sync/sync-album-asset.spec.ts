@@ -309,4 +309,114 @@ describe(SyncRequestType.AlbumAssetsV1, () => {
       expect.objectContaining({ type: SyncEntityType.SyncCompleteV1 }),
     ]);
   });
+
+  it('should send album asset with spoofed ownerId when showInTimeline is true (create)', async () => {
+    const { auth, ctx } = await setup();
+    const { user: user2 } = await ctx.newUser();
+    const { asset } = await ctx.newAsset({ ownerId: user2.id });
+    const { album } = await ctx.newAlbum({ ownerId: user2.id });
+    await ctx.newAlbumAsset({ albumId: album.id, assetId: asset.id });
+    await ctx.newAlbumUser({ albumId: album.id, userId: auth.user.id, role: AlbumUserRole.Editor, showInTimeline: true });
+
+    const response = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(response).toEqual([
+      updateSyncAck,
+      {
+        ack: expect.any(String),
+        data: expect.objectContaining({
+          id: asset.id,
+          ownerId: auth.user.id, // ownerId is spoofed to the requesting user
+        }),
+        type: SyncEntityType.AlbumAssetCreateV1,
+      },
+      expect.objectContaining({ type: SyncEntityType.SyncCompleteV1 }),
+    ]);
+  });
+
+  it('should send album asset with real ownerId when showInTimeline is false (create)', async () => {
+    const { auth, ctx } = await setup();
+    const { user: user2 } = await ctx.newUser();
+    const { asset } = await ctx.newAsset({ ownerId: user2.id });
+    const { album } = await ctx.newAlbum({ ownerId: user2.id });
+    await ctx.newAlbumAsset({ albumId: album.id, assetId: asset.id });
+    await ctx.newAlbumUser({ albumId: album.id, userId: auth.user.id, role: AlbumUserRole.Editor, showInTimeline: false });
+
+    const response = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(response).toEqual([
+      updateSyncAck,
+      {
+        ack: expect.any(String),
+        data: expect.objectContaining({
+          id: asset.id,
+          ownerId: asset.ownerId, // ownerId is the real owner (user2)
+        }),
+        type: SyncEntityType.AlbumAssetCreateV1,
+      },
+      expect.objectContaining({ type: SyncEntityType.SyncCompleteV1 }),
+    ]);
+  });
+
+  it('should send backfill album asset with spoofed ownerId when showInTimeline is true', async () => {
+    const { auth, ctx } = await setup();
+    const { user: user2 } = await ctx.newUser();
+    const { asset } = await ctx.newAsset({ ownerId: user2.id });
+    const { album } = await ctx.newAlbum({ ownerId: user2.id });
+    await ctx.newAlbumAsset({ albumId: album.id, assetId: asset.id });
+    await ctx.newAlbumUser({ albumId: album.id, userId: auth.user.id, role: AlbumUserRole.Editor, showInTimeline: true });
+
+    // First sync to get the createCheckpoint
+    const firstResponse = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    await ctx.syncAckAll(auth, firstResponse);
+
+    // Now add a second album where the user is also a member
+    const { album: album2 } = await ctx.newAlbum({ ownerId: user2.id });
+    const { asset: asset2 } = await ctx.newAsset({ ownerId: user2.id });
+    await ctx.newAlbumAsset({ albumId: album2.id, assetId: asset2.id });
+    await ctx.newAlbumUser({ albumId: album2.id, userId: auth.user.id, role: AlbumUserRole.Editor, showInTimeline: true });
+
+    // The backfill should include asset2 with spoofed ownerId
+    const response = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(response).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          data: expect.objectContaining({
+            id: asset2.id,
+            ownerId: auth.user.id,
+          }),
+          type: SyncEntityType.AlbumAssetBackfillV1,
+        }),
+      ]),
+    );
+  });
+
+  it('should send asset update with spoofed ownerId when showInTimeline is true', async () => {
+    const { auth, ctx } = await setup();
+    const { user: user2 } = await ctx.newUser();
+    const { asset } = await ctx.newAsset({ ownerId: user2.id, isFavorite: false });
+    const { album } = await ctx.newAlbum({ ownerId: user2.id });
+    await wait(2);
+    await ctx.newAlbumAsset({ albumId: album.id, assetId: asset.id });
+    await ctx.newAlbumUser({ albumId: album.id, userId: auth.user.id, role: AlbumUserRole.Editor, showInTimeline: true });
+
+    const response = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    await ctx.syncAckAll(auth, response);
+
+    // update the asset
+    const assetRepository = ctx.get(AssetRepository);
+    await assetRepository.update({ id: asset.id, isFavorite: true });
+
+    const updateResponse = await ctx.syncStream(auth, [SyncRequestType.AlbumAssetsV1]);
+    expect(updateResponse).toEqual([
+      {
+        ack: expect.any(String),
+        data: expect.objectContaining({
+          id: asset.id,
+          isFavorite: true,
+          ownerId: auth.user.id, // ownerId is spoofed
+        }),
+        type: SyncEntityType.AlbumAssetUpdateV1,
+      },
+      expect.objectContaining({ type: SyncEntityType.SyncCompleteV1 }),
+    ]);
+  });
 });

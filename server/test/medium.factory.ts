@@ -227,10 +227,10 @@ export class MediumTestContext<S extends BaseService = BaseService> {
     return { albumAsset, result };
   }
 
-  async newAlbumUser(dto: { albumId: string; userId: string; role?: AlbumUserRole }) {
-    const { albumId, userId, role = AlbumUserRole.Editor } = dto;
-    const result = await this.get(AlbumUserRepository).create({ albumId, userId, role });
-    return { albumUser: { albumId, userId, role }, result };
+  async newAlbumUser(dto: { albumId: string; userId: string; role?: AlbumUserRole; showInTimeline?: boolean }) {
+    const { albumId, userId, role = AlbumUserRole.Editor, showInTimeline = false } = dto;
+    const result = await this.get(AlbumUserRepository).create({ albumId, userId, role, showInTimeline });
+    return { albumUser: { albumId, userId, role, showInTimeline }, result };
   }
 
   async newJobStatus(dto: Partial<Insertable<AssetJobStatusTable>> & { assetId: string }) {

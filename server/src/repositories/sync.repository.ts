@@ -145,7 +145,7 @@ class AlbumSync extends BaseSync {
   getCreatedAfter({ nowId, userId, afterCreateId }: SyncCreatedAfterOptions) {
     return this.db
       .selectFrom('album_user')
-      .select(['albumId as id', 'createId'])
+      .select(['albumId as id', 'createId', 'showInTimeline'])
       .where('userId', '=', userId)
       .$if(!!afterCreateId, (qb) => qb.where('createId', '>=', afterCreateId!))
       .where('createId', '<', nowId)
@@ -208,8 +208,11 @@ class AlbumAssetSync extends BaseSync {
       .select('asset.updateId')
       .where('album_asset.updateId', '<=', albumToAssetAck.updateId) // Ensure we only send updates for assets that the client already knows about
       .innerJoin('album', 'album.id', 'album_asset.albumId')
-      .leftJoin('album_user', 'album_user.albumId', 'album_asset.albumId')
+      .leftJoin('album_user', (join) =>
+        join.onRef('album_user.albumId', '=', 'album_asset.albumId').on('album_user.userId', '=', userId),
+      )
       .where((eb) => eb.or([eb('album.ownerId', '=', userId), eb('album_user.userId', '=', userId)]))
+      .select('album_user.showInTimeline')
       .stream();
   }
 
@@ -221,8 +224,11 @@ class AlbumAssetSync extends BaseSync {
       .innerJoin('asset', 'asset.id', 'album_asset.assetId')
       .select(columns.syncAsset)
       .innerJoin('album', 'album.id', 'album_asset.albumId')
-      .leftJoin('album_user', 'album_user.albumId', 'album_asset.albumId')
+      .leftJoin('album_user', (join) =>
+        join.onRef('album_user.albumId', '=', 'album_asset.albumId').on('album_user.userId', '=', userId),
+      )
       .where((eb) => eb.or([eb('album.ownerId', '=', userId), eb('album_user.userId', '=', userId)]))
+      .select('album_user.showInTimeline')
       .stream();
   }
 }
