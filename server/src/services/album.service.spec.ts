@@ -541,6 +541,21 @@ describe(AlbumService.name, () => {
         { role: AlbumUserRole.Viewer },
       );
     });
+
+    it('should allow user to update their own showInTimeline setting', async () => {
+      const user = UserFactory.create();
+      const album = AlbumFactory.from().albumUser({ userId: user.id }).build();
+      mocks.access.album.checkOwnerAccess.mockResolvedValue(new Set());
+      mocks.access.album.checkSharedAlbumAccess.mockResolvedValue(new Set([album.id]));
+      mocks.albumUser.update.mockResolvedValue();
+
+      await sut.updateUser(AuthFactory.create(user), album.id, user.id, { showInTimeline: true });
+
+      expect(mocks.albumUser.update).toHaveBeenCalledWith(
+        { albumId: album.id, userId: user.id },
+        { showInTimeline: true },
+      );
+    });
   });
 
   describe('getAlbumInfo', () => {

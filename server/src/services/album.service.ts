@@ -321,8 +321,17 @@ export class AlbumService extends BaseService {
   }
 
   async updateUser(auth: AuthDto, id: string, userId: string, dto: UpdateAlbumUserDto): Promise<void> {
+    // Allow users to update their own showInTimeline setting
+    if (auth.user.id === userId && dto.showInTimeline !== undefined && dto.role === undefined) {
+      await this.requireAccess({ auth, permission: Permission.AlbumRead, ids: [id] });
+      await this.albumUserRepository.update({ albumId: id, userId }, { showInTimeline: dto.showInTimeline });
+      return;
+    }
     await this.requireAccess({ auth, permission: Permission.AlbumShare, ids: [id] });
-    await this.albumUserRepository.update({ albumId: id, userId }, { role: dto.role });
+    await this.albumUserRepository.update({ albumId: id, userId }, {
+      ...(dto.role !== undefined ? { role: dto.role } : {}),
+      ...(dto.showInTimeline !== undefined ? { showInTimeline: dto.showInTimeline } : {}),
+    });
   }
 
   private async findOrFail(id: string, options: AlbumInfoOptions) {

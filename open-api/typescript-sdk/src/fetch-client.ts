@@ -452,6 +452,8 @@ export type AssetStatsResponseDto = {
 export type AlbumUserResponseDto = {
     /** Album user role */
     role: AlbumUserRole;
+    /** Show shared album assets in timeline */
+    showInTimeline: boolean;
     user: UserResponseDto;
 };
 export type ExifResponseDto = {
@@ -732,7 +734,9 @@ export type BulkIdResponseDto = {
 };
 export type UpdateAlbumUserDto = {
     /** Album user role */
-    role: AlbumUserRole;
+    role?: AlbumUserRole;
+    /** Show shared album assets in timeline */
+    showInTimeline?: boolean;
 };
 export type AlbumUserAddDto = {
     /** Album user role */

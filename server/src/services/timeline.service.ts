@@ -28,6 +28,7 @@ export class TimelineService extends BaseService {
   private async buildTimeBucketOptions(auth: AuthDto, dto: TimeBucketDto): Promise<TimeBucketOptions> {
     const { userId, ...options } = dto;
     let userIds: string[] | undefined = undefined;
+    let timelineAlbumIds: string[] | undefined = undefined;
 
     if (userId) {
       userIds = [userId];
@@ -41,7 +42,18 @@ export class TimelineService extends BaseService {
       }
     }
 
-    return { ...options, userIds };
+    if (!dto.albumId && userId === auth.user.id) {
+      const albumIds = await this.albumUserRepository.getTimelineAlbumIds(auth.user.id);
+      if (albumIds.length > 0) {
+        timelineAlbumIds = albumIds;
+      }
+    }
+
+    return {
+      ...options,
+      userIds,
+      ...(timelineAlbumIds !== undefined && { timelineAlbumIds }),
+    };
   }
 
   private async timeBucketChecks(auth: AuthDto, dto: TimeBucketDto) {
