@@ -13,6 +13,8 @@ class RemoteAlbumUserEntity extends Table with DriftDefaultsMixin {
 
   IntColumn get role => intEnum<AlbumUserRole>()();
 
+  BoolColumn get showInTimeline => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {albumId, userId};
 }

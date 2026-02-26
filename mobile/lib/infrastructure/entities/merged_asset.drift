@@ -3,8 +3,10 @@ import 'stack.entity.dart';
 import 'local_asset.entity.dart';
 import 'local_album.entity.dart';
 import 'local_album_asset.entity.dart';
+import 'remote_album_asset.entity.dart';
+import 'remote_album_user.entity.dart';
 
-mergedAsset: 
+mergedAsset(:current_user_id AS TEXT): 
 SELECT
 	rae.id as remote_id,
 	(SELECT lae.id FROM local_asset_entity lae WHERE lae.checksum = rae.checksum LIMIT 1) as local_id,
@@ -38,6 +40,49 @@ WHERE
 	AND (
 		rae.stack_id IS NULL
 		OR rae.id = se.primary_asset_id
+	)
+
+UNION ALL
+
+SELECT
+	rae.id as remote_id,
+	(SELECT lae.id FROM local_asset_entity lae WHERE lae.checksum = rae.checksum LIMIT 1) as local_id,
+	rae.name,
+	rae."type",
+	rae.created_at as created_at,
+	rae.updated_at,
+	rae.width,
+	rae.height,
+	rae.duration_in_seconds,
+	rae.is_favorite,
+	rae.thumb_hash,
+	rae.checksum,
+	rae.owner_id,
+	rae.live_photo_video_id,
+	0 as orientation,
+	rae.stack_id,
+	NULL as i_cloud_id,
+	NULL as latitude,
+	NULL as longitude,
+	NULL as adjustmentTime,
+	rae.is_edited
+FROM
+	remote_asset_entity rae
+LEFT JOIN
+	stack_entity se ON rae.stack_id = se.id
+WHERE
+	rae.deleted_at IS NULL
+	AND rae.owner_id NOT IN :user_ids
+	AND (
+		rae.stack_id IS NULL
+		OR rae.id = se.primary_asset_id
+	)
+	AND EXISTS (
+		SELECT 1 FROM remote_album_asset_entity raa
+		INNER JOIN remote_album_user_entity rau ON rau.album_id = raa.album_id
+		WHERE raa.asset_id = rae.id
+			AND rau.user_id = :current_user_id
+			AND rau.show_in_timeline = 1
 	)
 
 UNION ALL
@@ -82,7 +127,7 @@ AND NOT EXISTS (
 ORDER BY created_at DESC
 LIMIT $limit;
 
-mergedBucket(:group_by AS INTEGER):
+mergedBucket(:group_by AS INTEGER, :current_user_id AS TEXT):
 SELECT
 	COUNT(*) as asset_count,
 	bucket_date
@@ -110,6 +155,36 @@ FROM
 		AND (
 			rae.stack_id IS NULL
 			OR rae.id = se.primary_asset_id
+		)
+	UNION ALL
+	SELECT
+		CASE
+			WHEN :group_by = 0 THEN COALESCE(
+				STRFTIME('%Y-%m-%d', rae.local_date_time),
+				STRFTIME('%Y-%m-%d', rae.created_at, 'localtime')
+			)
+			WHEN :group_by = 1 THEN COALESCE(
+				STRFTIME('%Y-%m', rae.local_date_time),
+				STRFTIME('%Y-%m', rae.created_at, 'localtime')
+			)
+		END as bucket_date
+	FROM
+		remote_asset_entity rae
+	LEFT JOIN
+		stack_entity se ON rae.stack_id = se.id
+	WHERE
+		rae.deleted_at IS NULL
+		AND rae.owner_id NOT IN :user_ids
+		AND (
+			rae.stack_id IS NULL
+			OR rae.id = se.primary_asset_id
+		)
+		AND EXISTS (
+			SELECT 1 FROM remote_album_asset_entity raa
+			INNER JOIN remote_album_user_entity rau ON rau.album_id = raa.album_id
+			WHERE raa.asset_id = rae.id
+				AND rau.user_id = :current_user_id
+				AND rau.show_in_timeline = 1
 		)
 	UNION ALL
 	SELECT

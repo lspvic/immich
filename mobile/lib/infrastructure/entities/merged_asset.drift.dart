@@ -13,14 +13,19 @@ import 'package:immich_mobile/infrastructure/entities/local_album_asset.entity.d
     as i6;
 import 'package:immich_mobile/infrastructure/entities/local_album.entity.drift.dart'
     as i7;
+import 'package:immich_mobile/infrastructure/entities/remote_album_asset.entity.drift.dart'
+    as i8;
+import 'package:immich_mobile/infrastructure/entities/remote_album_user.entity.drift.dart'
+    as i9;
 
 class MergedAssetDrift extends i1.ModularAccessor {
   MergedAssetDrift(i0.GeneratedDatabase db) : super(db);
   i0.Selectable<MergedAssetResult> mergedAsset({
+    required String currentUserId,
     required List<String> userIds,
     required MergedAsset$limit limit,
   }) {
-    var $arrayStartIndex = 1;
+    var $arrayStartIndex = 2;
     final expandeduserIds = $expandVar($arrayStartIndex, userIds.length);
     $arrayStartIndex += userIds.length;
     final generatedlimit = $write(
@@ -29,8 +34,9 @@ class MergedAssetDrift extends i1.ModularAccessor {
     );
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-      'SELECT rae.id AS remote_id, (SELECT lae.id FROM local_asset_entity AS lae WHERE lae.checksum = rae.checksum LIMIT 1) AS local_id, rae.name, rae.type, rae.created_at AS created_at, rae.updated_at, rae.width, rae.height, rae.duration_in_seconds, rae.is_favorite, rae.thumb_hash, rae.checksum, rae.owner_id, rae.live_photo_video_id, 0 AS orientation, rae.stack_id, NULL AS i_cloud_id, NULL AS latitude, NULL AS longitude, NULL AS adjustmentTime, rae.is_edited FROM remote_asset_entity AS rae LEFT JOIN stack_entity AS se ON rae.stack_id = se.id WHERE rae.deleted_at IS NULL AND rae.visibility = 0 AND rae.owner_id IN ($expandeduserIds) AND(rae.stack_id IS NULL OR rae.id = se.primary_asset_id)UNION ALL SELECT NULL AS remote_id, lae.id AS local_id, lae.name, lae.type, lae.created_at AS created_at, lae.updated_at, lae.width, lae.height, lae.duration_in_seconds, lae.is_favorite, NULL AS thumb_hash, lae.checksum, NULL AS owner_id, NULL AS live_photo_video_id, lae.orientation, NULL AS stack_id, lae.i_cloud_id, lae.latitude, lae.longitude, lae.adjustment_time, 0 AS is_edited FROM local_asset_entity AS lae WHERE NOT EXISTS (SELECT 1 FROM remote_asset_entity AS rae WHERE rae.checksum = lae.checksum AND rae.owner_id IN ($expandeduserIds)) AND EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 0) AND NOT EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 2) ORDER BY created_at DESC ${generatedlimit.sql}',
+      'SELECT rae.id AS remote_id, (SELECT lae.id FROM local_asset_entity AS lae WHERE lae.checksum = rae.checksum LIMIT 1) AS local_id, rae.name, rae.type, rae.created_at AS created_at, rae.updated_at, rae.width, rae.height, rae.duration_in_seconds, rae.is_favorite, rae.thumb_hash, rae.checksum, rae.owner_id, rae.live_photo_video_id, 0 AS orientation, rae.stack_id, NULL AS i_cloud_id, NULL AS latitude, NULL AS longitude, NULL AS adjustmentTime, rae.is_edited FROM remote_asset_entity AS rae LEFT JOIN stack_entity AS se ON rae.stack_id = se.id WHERE rae.deleted_at IS NULL AND rae.visibility = 0 AND rae.owner_id IN ($expandeduserIds) AND(rae.stack_id IS NULL OR rae.id = se.primary_asset_id)UNION ALL SELECT rae.id AS remote_id, (SELECT lae.id FROM local_asset_entity AS lae WHERE lae.checksum = rae.checksum LIMIT 1) AS local_id, rae.name, rae.type, rae.created_at AS created_at, rae.updated_at, rae.width, rae.height, rae.duration_in_seconds, rae.is_favorite, rae.thumb_hash, rae.checksum, rae.owner_id, rae.live_photo_video_id, 0 AS orientation, rae.stack_id, NULL AS i_cloud_id, NULL AS latitude, NULL AS longitude, NULL AS adjustmentTime, rae.is_edited FROM remote_asset_entity AS rae LEFT JOIN stack_entity AS se ON rae.stack_id = se.id WHERE rae.deleted_at IS NULL AND rae.owner_id NOT IN ($expandeduserIds) AND(rae.stack_id IS NULL OR rae.id = se.primary_asset_id) AND EXISTS (SELECT 1 FROM remote_album_asset_entity AS raa INNER JOIN remote_album_user_entity AS rau ON rau.album_id = raa.album_id WHERE raa.asset_id = rae.id AND rau.user_id = ?1 AND rau.show_in_timeline = 1)UNION ALL SELECT NULL AS remote_id, lae.id AS local_id, lae.name, lae.type, lae.created_at AS created_at, lae.updated_at, lae.width, lae.height, lae.duration_in_seconds, lae.is_favorite, NULL AS thumb_hash, lae.checksum, NULL AS owner_id, NULL AS live_photo_video_id, lae.orientation, NULL AS stack_id, lae.i_cloud_id, lae.latitude, lae.longitude, lae.adjustment_time, 0 AS is_edited FROM local_asset_entity AS lae WHERE NOT EXISTS (SELECT 1 FROM remote_asset_entity AS rae WHERE rae.checksum = lae.checksum AND rae.owner_id IN ($expandeduserIds)) AND EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 0) AND NOT EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 2) ORDER BY created_at DESC ${generatedlimit.sql}',
       variables: [
+        i0.Variable<String>(currentUserId),
         for (var $ in userIds) i0.Variable<String>($),
         ...generatedlimit.introducedVariables,
       ],
@@ -40,6 +46,8 @@ class MergedAssetDrift extends i1.ModularAccessor {
         stackEntity,
         localAlbumAssetEntity,
         localAlbumEntity,
+        remoteAlbumAssetEntity,
+        remoteAlbumUserEntity,
         ...generatedlimit.watchedTables,
       },
     ).map(
@@ -73,15 +81,17 @@ class MergedAssetDrift extends i1.ModularAccessor {
 
   i0.Selectable<MergedBucketResult> mergedBucket({
     required int groupBy,
+    required String currentUserId,
     required List<String> userIds,
   }) {
-    var $arrayStartIndex = 2;
+    var $arrayStartIndex = 3;
     final expandeduserIds = $expandVar($arrayStartIndex, userIds.length);
     $arrayStartIndex += userIds.length;
     return customSelect(
-      'SELECT COUNT(*) AS asset_count, bucket_date FROM (SELECT CASE WHEN ?1 = 0 THEN COALESCE(STRFTIME(\'%Y-%m-%d\', rae.local_date_time), STRFTIME(\'%Y-%m-%d\', rae.created_at, \'localtime\')) WHEN ?1 = 1 THEN COALESCE(STRFTIME(\'%Y-%m\', rae.local_date_time), STRFTIME(\'%Y-%m\', rae.created_at, \'localtime\')) END AS bucket_date FROM remote_asset_entity AS rae LEFT JOIN stack_entity AS se ON rae.stack_id = se.id WHERE rae.deleted_at IS NULL AND rae.visibility = 0 AND rae.owner_id IN ($expandeduserIds) AND(rae.stack_id IS NULL OR rae.id = se.primary_asset_id)UNION ALL SELECT CASE WHEN ?1 = 0 THEN STRFTIME(\'%Y-%m-%d\', lae.created_at, \'localtime\') WHEN ?1 = 1 THEN STRFTIME(\'%Y-%m\', lae.created_at, \'localtime\') END AS bucket_date FROM local_asset_entity AS lae WHERE NOT EXISTS (SELECT 1 FROM remote_asset_entity AS rae WHERE rae.checksum = lae.checksum AND rae.owner_id IN ($expandeduserIds)) AND EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 0) AND NOT EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 2)) GROUP BY bucket_date ORDER BY bucket_date DESC',
+      'SELECT COUNT(*) AS asset_count, bucket_date FROM (SELECT CASE WHEN ?1 = 0 THEN COALESCE(STRFTIME(\'%Y-%m-%d\', rae.local_date_time), STRFTIME(\'%Y-%m-%d\', rae.created_at, \'localtime\')) WHEN ?1 = 1 THEN COALESCE(STRFTIME(\'%Y-%m\', rae.local_date_time), STRFTIME(\'%Y-%m\', rae.created_at, \'localtime\')) END AS bucket_date FROM remote_asset_entity AS rae LEFT JOIN stack_entity AS se ON rae.stack_id = se.id WHERE rae.deleted_at IS NULL AND rae.visibility = 0 AND rae.owner_id IN ($expandeduserIds) AND(rae.stack_id IS NULL OR rae.id = se.primary_asset_id)UNION ALL SELECT CASE WHEN ?1 = 0 THEN COALESCE(STRFTIME(\'%Y-%m-%d\', rae.local_date_time), STRFTIME(\'%Y-%m-%d\', rae.created_at, \'localtime\')) WHEN ?1 = 1 THEN COALESCE(STRFTIME(\'%Y-%m\', rae.local_date_time), STRFTIME(\'%Y-%m\', rae.created_at, \'localtime\')) END AS bucket_date FROM remote_asset_entity AS rae LEFT JOIN stack_entity AS se ON rae.stack_id = se.id WHERE rae.deleted_at IS NULL AND rae.owner_id NOT IN ($expandeduserIds) AND(rae.stack_id IS NULL OR rae.id = se.primary_asset_id) AND EXISTS (SELECT 1 FROM remote_album_asset_entity AS raa INNER JOIN remote_album_user_entity AS rau ON rau.album_id = raa.album_id WHERE raa.asset_id = rae.id AND rau.user_id = ?2 AND rau.show_in_timeline = 1)UNION ALL SELECT CASE WHEN ?1 = 0 THEN STRFTIME(\'%Y-%m-%d\', lae.created_at, \'localtime\') WHEN ?1 = 1 THEN STRFTIME(\'%Y-%m\', lae.created_at, \'localtime\') END AS bucket_date FROM local_asset_entity AS lae WHERE NOT EXISTS (SELECT 1 FROM remote_asset_entity AS rae WHERE rae.checksum = lae.checksum AND rae.owner_id IN ($expandeduserIds)) AND EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 0) AND NOT EXISTS (SELECT 1 FROM local_album_asset_entity AS laa INNER JOIN local_album_entity AS la ON laa.album_id = la.id WHERE laa.asset_id = lae.id AND la.backup_selection = 2)) GROUP BY bucket_date ORDER BY bucket_date DESC',
       variables: [
         i0.Variable<int>(groupBy),
+        i0.Variable<String>(currentUserId),
         for (var $ in userIds) i0.Variable<String>($),
       ],
       readsFrom: {
@@ -90,6 +100,8 @@ class MergedAssetDrift extends i1.ModularAccessor {
         localAssetEntity,
         localAlbumAssetEntity,
         localAlbumEntity,
+        remoteAlbumAssetEntity,
+        remoteAlbumUserEntity,
       },
     ).map(
       (i0.QueryRow row) => MergedBucketResult(
@@ -115,6 +127,14 @@ class MergedAssetDrift extends i1.ModularAccessor {
   i7.$LocalAlbumEntityTable get localAlbumEntity => i1.ReadDatabaseContainer(
     attachedDatabase,
   ).resultSet<i7.$LocalAlbumEntityTable>('local_album_entity');
+  i8.$RemoteAlbumAssetEntityTable get remoteAlbumAssetEntity =>
+      i1.ReadDatabaseContainer(
+        attachedDatabase,
+      ).resultSet<i8.$RemoteAlbumAssetEntityTable>('remote_album_asset_entity');
+  i9.$RemoteAlbumUserEntityTable get remoteAlbumUserEntity =>
+      i1.ReadDatabaseContainer(
+        attachedDatabase,
+      ).resultSet<i9.$RemoteAlbumUserEntityTable>('remote_album_user_entity');
 }
 
 class MergedAssetResult {
