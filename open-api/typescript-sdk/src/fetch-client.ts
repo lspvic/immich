@@ -2945,6 +2945,8 @@ export type SyncAlbumUserV1 = {
     albumId: string;
     /** Album user role */
     role: AlbumUserRole;
+    /** Show shared album assets in timeline */
+    showInTimeline: boolean;
     /** User ID */
     userId: string;
 };

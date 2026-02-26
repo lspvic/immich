@@ -277,6 +277,8 @@ export class SyncAlbumUserV1 {
   userId!: string;
   @ValidateEnum({ enum: AlbumUserRole, name: 'AlbumUserRole', description: 'Album user role' })
   role!: AlbumUserRole;
+  @ApiProperty({ description: 'Show shared album assets in timeline' })
+  showInTimeline!: boolean;
 }
 
 @ExtraModel()

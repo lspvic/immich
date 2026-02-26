@@ -22537,6 +22537,10 @@
             ],
             "description": "Album user role"
           },
+          "showInTimeline": {
+            "description": "Show shared album assets in timeline",
+            "type": "boolean"
+          },
           "userId": {
             "description": "User ID",
             "type": "string"
@@ -22545,6 +22549,7 @@
         "required": [
           "albumId",
           "role",
+          "showInTimeline",
           "userId"
         ],
         "type": "object"
