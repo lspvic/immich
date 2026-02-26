@@ -17,14 +17,12 @@ typedef $$RemoteAlbumUserEntityTableCreateCompanionBuilder =
       required String albumId,
       required String userId,
       required i2.AlbumUserRole role,
-      i0.Value<bool> showInTimeline,
     });
 typedef $$RemoteAlbumUserEntityTableUpdateCompanionBuilder =
     i1.RemoteAlbumUserEntityCompanion Function({
       i0.Value<String> albumId,
       i0.Value<String> userId,
       i0.Value<i2.AlbumUserRole> role,
-      i0.Value<bool> showInTimeline,
     });
 
 final class $$RemoteAlbumUserEntityTableReferences
@@ -124,11 +122,6 @@ class $$RemoteAlbumUserEntityTableFilterComposer
     builder: (column) => i0.ColumnWithTypeConverterFilters(column),
   );
 
-  i0.ColumnFilters<bool> get showInTimeline => $composableBuilder(
-    column: $table.showInTimeline,
-    builder: (column) => i0.ColumnFilters(column),
-  );
-
   i4.$$RemoteAlbumEntityTableFilterComposer get albumId {
     final i4.$$RemoteAlbumEntityTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -195,11 +188,6 @@ class $$RemoteAlbumUserEntityTableOrderingComposer
   });
   i0.ColumnOrderings<int> get role => $composableBuilder(
     column: $table.role,
-    builder: (column) => i0.ColumnOrderings(column),
-  );
-
-  i0.ColumnOrderings<bool> get showInTimeline => $composableBuilder(
-    column: $table.showInTimeline,
     builder: (column) => i0.ColumnOrderings(column),
   );
 
@@ -270,9 +258,6 @@ class $$RemoteAlbumUserEntityTableAnnotationComposer
   });
   i0.GeneratedColumnWithTypeConverter<i2.AlbumUserRole, int> get role =>
       $composableBuilder(column: $table.role, builder: (column) => column);
-
-  i0.GeneratedColumn<bool> get showInTimeline =>
-      $composableBuilder(column: $table.showInTimeline, builder: (column) => column);
 
   i4.$$RemoteAlbumEntityTableAnnotationComposer get albumId {
     final i4.$$RemoteAlbumEntityTableAnnotationComposer composer =
@@ -375,24 +360,20 @@ class $$RemoteAlbumUserEntityTableTableManager
                 i0.Value<String> albumId = const i0.Value.absent(),
                 i0.Value<String> userId = const i0.Value.absent(),
                 i0.Value<i2.AlbumUserRole> role = const i0.Value.absent(),
-                i0.Value<bool> showInTimeline = const i0.Value.absent(),
               }) => i1.RemoteAlbumUserEntityCompanion(
                 albumId: albumId,
                 userId: userId,
                 role: role,
-                showInTimeline: showInTimeline,
               ),
           createCompanionCallback:
               ({
                 required String albumId,
                 required String userId,
                 required i2.AlbumUserRole role,
-                i0.Value<bool> showInTimeline = const i0.Value.absent(),
               }) => i1.RemoteAlbumUserEntityCompanion.insert(
                 albumId: albumId,
                 userId: userId,
                 role: role,
-                showInTimeline: showInTimeline,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -528,22 +509,8 @@ class $RemoteAlbumUserEntityTable extends i3.RemoteAlbumUserEntity
       ).withConverter<i2.AlbumUserRole>(
         i1.$RemoteAlbumUserEntityTable.$converterrole,
       );
-  static const i0.VerificationMeta _showInTimelineMeta =
-      const i0.VerificationMeta('showInTimeline');
   @override
-  late final i0.GeneratedColumn<bool> showInTimeline = i0.GeneratedColumn<bool>(
-    'show_in_timeline',
-    aliasedName,
-    false,
-    type: i0.DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: i0.GeneratedColumn.constraintIsAlways(
-      'CHECK ("show_in_timeline" IN (0, 1))',
-    ),
-    defaultValue: const i0.CustomExpression('0'),
-  );
-  @override
-  List<i0.GeneratedColumn> get $columns => [albumId, userId, role, showInTimeline];
+  List<i0.GeneratedColumn> get $columns => [albumId, userId, role];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -572,12 +539,6 @@ class $RemoteAlbumUserEntityTable extends i3.RemoteAlbumUserEntity
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    if (data.containsKey('show_in_timeline')) {
-      context.handle(
-        _showInTimelineMeta,
-        showInTimeline.isAcceptableOrUnknown(data['show_in_timeline']!, _showInTimelineMeta),
-      );
-    }
     return context;
   }
 
@@ -604,10 +565,6 @@ class $RemoteAlbumUserEntityTable extends i3.RemoteAlbumUserEntity
           data['${effectivePrefix}role'],
         )!,
       ),
-      showInTimeline: attachedDatabase.typeMapping.read(
-        i0.DriftSqlType.bool,
-        data['${effectivePrefix}show_in_timeline'],
-      )!,
     );
   }
 
@@ -629,12 +586,10 @@ class RemoteAlbumUserEntityData extends i0.DataClass
   final String albumId;
   final String userId;
   final i2.AlbumUserRole role;
-  final bool showInTimeline;
   const RemoteAlbumUserEntityData({
     required this.albumId,
     required this.userId,
     required this.role,
-    required this.showInTimeline,
   });
   @override
   Map<String, i0.Expression> toColumns(bool nullToAbsent) {
@@ -646,7 +601,6 @@ class RemoteAlbumUserEntityData extends i0.DataClass
         i1.$RemoteAlbumUserEntityTable.$converterrole.toSql(role),
       );
     }
-    map['show_in_timeline'] = i0.Variable<bool>(showInTimeline);
     return map;
   }
 
@@ -661,7 +615,6 @@ class RemoteAlbumUserEntityData extends i0.DataClass
       role: i1.$RemoteAlbumUserEntityTable.$converterrole.fromJson(
         serializer.fromJson<int>(json['role']),
       ),
-      showInTimeline: serializer.fromJson<bool>(json['showInTimeline']),
     );
   }
   @override
@@ -673,7 +626,6 @@ class RemoteAlbumUserEntityData extends i0.DataClass
       'role': serializer.toJson<int>(
         i1.$RemoteAlbumUserEntityTable.$converterrole.toJson(role),
       ),
-      'showInTimeline': serializer.toJson<bool>(showInTimeline),
     };
   }
 
@@ -681,12 +633,10 @@ class RemoteAlbumUserEntityData extends i0.DataClass
     String? albumId,
     String? userId,
     i2.AlbumUserRole? role,
-    bool? showInTimeline,
   }) => i1.RemoteAlbumUserEntityData(
     albumId: albumId ?? this.albumId,
     userId: userId ?? this.userId,
     role: role ?? this.role,
-    showInTimeline: showInTimeline ?? this.showInTimeline,
   );
   RemoteAlbumUserEntityData copyWithCompanion(
     i1.RemoteAlbumUserEntityCompanion data,
@@ -695,7 +645,6 @@ class RemoteAlbumUserEntityData extends i0.DataClass
       albumId: data.albumId.present ? data.albumId.value : this.albumId,
       userId: data.userId.present ? data.userId.value : this.userId,
       role: data.role.present ? data.role.value : this.role,
-      showInTimeline: data.showInTimeline.present ? data.showInTimeline.value : this.showInTimeline,
     );
   }
 
@@ -704,22 +653,20 @@ class RemoteAlbumUserEntityData extends i0.DataClass
     return (StringBuffer('RemoteAlbumUserEntityData(')
           ..write('albumId: $albumId, ')
           ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('showInTimeline: $showInTimeline')
+          ..write('role: $role')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(albumId, userId, role, showInTimeline);
+  int get hashCode => Object.hash(albumId, userId, role);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is i1.RemoteAlbumUserEntityData &&
           other.albumId == this.albumId &&
           other.userId == this.userId &&
-          other.role == this.role &&
-          other.showInTimeline == this.showInTimeline);
+          other.role == this.role);
 }
 
 class RemoteAlbumUserEntityCompanion
@@ -727,33 +674,27 @@ class RemoteAlbumUserEntityCompanion
   final i0.Value<String> albumId;
   final i0.Value<String> userId;
   final i0.Value<i2.AlbumUserRole> role;
-  final i0.Value<bool> showInTimeline;
   const RemoteAlbumUserEntityCompanion({
     this.albumId = const i0.Value.absent(),
     this.userId = const i0.Value.absent(),
     this.role = const i0.Value.absent(),
-    this.showInTimeline = const i0.Value.absent(),
   });
   RemoteAlbumUserEntityCompanion.insert({
     required String albumId,
     required String userId,
     required i2.AlbumUserRole role,
-    i0.Value<bool> showInTimeline = const i0.Value.absent(),
   }) : albumId = i0.Value(albumId),
        userId = i0.Value(userId),
-       role = i0.Value(role),
-       showInTimeline = showInTimeline;
+       role = i0.Value(role);
   static i0.Insertable<i1.RemoteAlbumUserEntityData> custom({
     i0.Expression<String>? albumId,
     i0.Expression<String>? userId,
     i0.Expression<int>? role,
-    i0.Expression<bool>? showInTimeline,
   }) {
     return i0.RawValuesInsertable({
       if (albumId != null) 'album_id': albumId,
       if (userId != null) 'user_id': userId,
       if (role != null) 'role': role,
-      if (showInTimeline != null) 'show_in_timeline': showInTimeline,
     });
   }
 
@@ -761,13 +702,11 @@ class RemoteAlbumUserEntityCompanion
     i0.Value<String>? albumId,
     i0.Value<String>? userId,
     i0.Value<i2.AlbumUserRole>? role,
-    i0.Value<bool>? showInTimeline,
   }) {
     return i1.RemoteAlbumUserEntityCompanion(
       albumId: albumId ?? this.albumId,
       userId: userId ?? this.userId,
       role: role ?? this.role,
-      showInTimeline: showInTimeline ?? this.showInTimeline,
     );
   }
 
@@ -785,9 +724,6 @@ class RemoteAlbumUserEntityCompanion
         i1.$RemoteAlbumUserEntityTable.$converterrole.toSql(role.value),
       );
     }
-    if (showInTimeline.present) {
-      map['show_in_timeline'] = i0.Variable<bool>(showInTimeline.value);
-    }
     return map;
   }
 
@@ -796,8 +732,7 @@ class RemoteAlbumUserEntityCompanion
     return (StringBuffer('RemoteAlbumUserEntityCompanion(')
           ..write('albumId: $albumId, ')
           ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('showInTimeline: $showInTimeline')
+          ..write('role: $role')
           ..write(')'))
         .toString();
   }
