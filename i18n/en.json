@@ -1088,6 +1088,7 @@
     "unable_to_add_remove_favorites": "Unable to {favorite, select, true {add asset to} other {remove asset from}} favorites",
     "unable_to_archive_unarchive": "Unable to {archived, select, true {archive} other {unarchive}}",
     "unable_to_change_album_user_role": "Unable to change the album user's role",
+    "unable_to_change_album_user_timeline": "Unable to update the album timeline setting",
     "unable_to_change_date": "Unable to change date",
     "unable_to_change_description": "Unable to change description",
     "unable_to_change_favorite": "Unable to change favorite for asset",

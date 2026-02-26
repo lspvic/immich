@@ -263,7 +263,7 @@
         ),
       };
     } catch (error) {
-      handleError(error, $t('errors.unable_to_change_album_user_role'));
+      handleError(error, $t('errors.unable_to_change_album_user_timeline'));
     }
   };
 
