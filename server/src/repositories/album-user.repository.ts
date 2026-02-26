@@ -34,6 +34,17 @@ export class AlbumUserRepository {
       .execute();
   }
 
+  @GenerateSql({ params: [DummyValue.UUID] })
+  async getTimelineAlbumIds(userId: string): Promise<string[]> {
+    const rows = await this.db
+      .selectFrom('album_user')
+      .select('albumId')
+      .where('userId', '=', userId)
+      .where('showInTimeline', '=', true)
+      .execute();
+    return rows.map((r) => r.albumId);
+  }
+
   @GenerateSql({ params: [{ userId: DummyValue.UUID, albumId: DummyValue.UUID }] })
   async delete({ userId, albumId }: AlbumPermissionId): Promise<void> {
     await this.db.deleteFrom('album_user').where('userId', '=', userId).where('albumId', '=', albumId).execute();

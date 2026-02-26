@@ -15718,12 +15718,17 @@
             ],
             "description": "Album user role"
           },
+          "showInTimeline": {
+            "description": "Show shared album assets in timeline",
+            "type": "boolean"
+          },
           "user": {
             "$ref": "#/components/schemas/UserResponseDto"
           }
         },
         "required": [
           "role",
+          "showInTimeline",
           "user"
         ],
         "type": "object"
@@ -25173,11 +25178,12 @@
               }
             ],
             "description": "Album user role"
+          },
+          "showInTimeline": {
+            "description": "Show shared album assets in timeline",
+            "type": "boolean"
           }
         },
-        "required": [
-          "role"
-        ],
         "type": "object"
       },
       "UpdateAssetDto": {

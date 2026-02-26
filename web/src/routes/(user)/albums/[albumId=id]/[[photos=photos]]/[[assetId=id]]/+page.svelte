@@ -52,7 +52,7 @@
   import { cancelMultiselect } from '$lib/utils/asset-utils';
   import { handleError } from '$lib/utils/handle-error';
   import { isAlbumsRoute, navigate, type AssetGridRouteSearchParams } from '$lib/utils/navigation';
-  import { AlbumUserRole, AssetVisibility, getAlbumInfo, updateAlbumInfo, type AlbumResponseDto } from '@immich/sdk';
+  import { AlbumUserRole, AssetVisibility, getAlbumInfo, updateAlbumInfo, updateAlbumUser, type AlbumResponseDto } from '@immich/sdk';
   import {
     ActionButton,
     CommandPaletteDefaultProvider,
@@ -65,6 +65,7 @@
     mdiAccountEye,
     mdiAccountEyeOutline,
     mdiArrowLeft,
+    mdiCalendarCheck,
     mdiCogOutline,
     mdiDeleteOutline,
     mdiDotsVertical,
@@ -248,6 +249,23 @@
   onDestroy(() => activityManager.reset());
 
   let isOwned = $derived($user.id == album.ownerId);
+
+  let currentAlbumUser = $derived(album.albumUsers.find(({ user: { id } }) => id === $user.id));
+  let showInTimeline = $derived(currentAlbumUser?.showInTimeline ?? false);
+
+  const handleToggleShowInTimeline = async () => {
+    try {
+      await updateAlbumUser({ id: album.id, userId: $user.id, updateAlbumUserDto: { showInTimeline: !showInTimeline } });
+      album = {
+        ...album,
+        albumUsers: album.albumUsers.map((albumUser) =>
+          albumUser.user.id === $user.id ? { ...albumUser, showInTimeline: !showInTimeline } : albumUser,
+        ),
+      };
+    } catch (error) {
+      handleError(error, $t('errors.unable_to_change_album_user_role'));
+    }
+  };
 
   let showActivityStatus = $derived(
     album.albumUsers.length > 0 && !$showAssetViewer && (album.isActivityEnabled || activityManager.commentCount > 0),
@@ -547,7 +565,7 @@
               />
             {/if}
 
-            {#if isOwned || containsEditors}
+            {#if isOwned || containsEditors || currentAlbumUser}
               <ButtonContextMenu
                 icon={mdiDotsVertical}
                 title={$t('album_options')}
@@ -559,6 +577,13 @@
                     icon={showAlbumUsers ? mdiAccountEye : mdiAccountEyeOutline}
                     text={$t('view_asset_owners')}
                     onClick={() => timelineManager.toggleShowAssetOwners()}
+                  />
+                {/if}
+                {#if currentAlbumUser && !isOwned}
+                  <MenuOption
+                    icon={mdiCalendarCheck}
+                    text={showInTimeline ? $t('hide_from_timeline') : $t('show_in_timeline')}
+                    onClick={handleToggleShowInTimeline}
                   />
                 {/if}
                 {#if isOwned && album.assetCount > 0}

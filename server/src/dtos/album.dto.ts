@@ -122,8 +122,11 @@ export class AlbumStatisticsResponseDto {
 }
 
 export class UpdateAlbumUserDto {
-  @ValidateEnum({ enum: AlbumUserRole, name: 'AlbumUserRole', description: 'Album user role' })
-  role!: AlbumUserRole;
+  @ValidateEnum({ enum: AlbumUserRole, name: 'AlbumUserRole', description: 'Album user role', optional: true })
+  role?: AlbumUserRole;
+
+  @ValidateBoolean({ optional: true, description: 'Show shared album assets in timeline' })
+  showInTimeline?: boolean;
 }
 
 export class AlbumUserResponseDto {
@@ -132,6 +135,8 @@ export class AlbumUserResponseDto {
   user!: UserResponseDto;
   @ValidateEnum({ enum: AlbumUserRole, name: 'AlbumUserRole', description: 'Album user role' })
   role!: AlbumUserRole;
+  @ApiProperty({ description: 'Show shared album assets in timeline' })
+  showInTimeline!: boolean;
 }
 
 export class ContributorCountResponseDto {
@@ -214,6 +219,7 @@ export const mapAlbum = (entity: MapAlbumDto, withAssets: boolean, auth?: AuthDt
       albumUsers.push({
         user,
         role: albumUser.role,
+        showInTimeline: albumUser.showInTimeline ?? false,
       });
     }
   }

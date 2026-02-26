@@ -10,6 +10,7 @@ describe(TimelineService.name, () => {
 
   beforeEach(() => {
     ({ sut, mocks } = newTestService(TimelineService));
+    mocks.albumUser.getTimelineAlbumIds.mockResolvedValue([]);
   });
 
   describe('getTimeBuckets', () => {
@@ -21,6 +22,20 @@ describe(TimelineService.name, () => {
       );
       expect(mocks.asset.getTimeBuckets).toHaveBeenCalledWith({
         userIds: [authStub.admin.user.id],
+      });
+    });
+
+    it('should include shared album assets in timeline when showInTimeline is enabled', async () => {
+      const albumId = 'shared-album-id';
+      mocks.albumUser.getTimelineAlbumIds.mockResolvedValue([albumId]);
+      mocks.asset.getTimeBuckets.mockResolvedValue([{ timeBucket: 'bucket', count: 1 }]);
+
+      await expect(sut.getTimeBuckets(authStub.admin, {})).resolves.toEqual(
+        expect.arrayContaining([{ timeBucket: 'bucket', count: 1 }]),
+      );
+      expect(mocks.asset.getTimeBuckets).toHaveBeenCalledWith({
+        userIds: [authStub.admin.user.id],
+        timelineAlbumIds: [albumId],
       });
     });
   });
