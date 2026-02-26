@@ -521,7 +521,11 @@ export class SyncService extends BaseService {
         );
 
         for await (const { updateId, ...data } of backfill) {
-          send(response, { type: backfillType, ids: [createId, updateId], data: mapSyncAssetV1(data) });
+          const asset = mapSyncAssetV1(data);
+          if (album.showInTimeline && asset.ownerId !== options.userId) {
+            asset.ownerId = options.userId;
+          }
+          send(response, { type: backfillType, ids: [createId, updateId], data: asset });
         }
 
         sendEntityBackfillCompleteAck(response, backfillType, createId);
@@ -539,14 +543,18 @@ export class SyncService extends BaseService {
         { ...options, ack: updateCheckpoint },
         createCheckpoint,
       );
-      for await (const { updateId, ...data } of updates) {
-        send(response, { type: updateType, ids: [updateId], data: mapSyncAssetV1(data) });
+      for await (const { updateId, showInTimeline, ...data } of updates) {
+        const asset = mapSyncAssetV1(data);
+        if (showInTimeline && asset.ownerId !== options.userId) {
+          asset.ownerId = options.userId;
+        }
+        send(response, { type: updateType, ids: [updateId], data: asset });
       }
     }
 
     const creates = this.syncRepository.albumAsset.getCreates({ ...options, ack: createCheckpoint });
     let first = true;
-    for await (const { updateId, ...data } of creates) {
+    for await (const { updateId, showInTimeline, ...data } of creates) {
       if (first) {
         send(response, {
           type: SyncEntityType.SyncAckV1,
@@ -556,7 +564,11 @@ export class SyncService extends BaseService {
         });
         first = false;
       }
-      send(response, { type: createType, ids: [updateId], data: mapSyncAssetV1(data) });
+      const asset = mapSyncAssetV1(data);
+      if (showInTimeline && asset.ownerId !== options.userId) {
+        asset.ownerId = options.userId;
+      }
+      send(response, { type: createType, ids: [updateId], data: asset });
     }
   }
 
