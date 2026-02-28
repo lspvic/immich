@@ -13,6 +13,8 @@ class FavoritesPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final renderList = ref.watch(favoriteTimelineProvider);
+
     AppBar buildAppBar() {
       return AppBar(
         leading: IconButton(onPressed: () => context.maybePop(), icon: const Icon(Icons.arrow_back_ios_rounded)),
@@ -20,40 +22,27 @@ class FavoritesPage extends HookConsumerWidget {
         automaticallyImplyLeading: false,
         title: const Text('favorites').tr(),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert_rounded),
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (ctx) => SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+          if (renderList.value != null && renderList.value!.totalAssets > 0)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded),
+              onSelected: (value) {
+                if (value == 'slideshow') {
+                  context.pushRoute(SlideshowRoute(renderList: renderList.value!));
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'slideshow',
+                  child: Row(
                     children: [
-                      ListTile(
-                        leading: const Icon(Icons.slideshow_rounded),
-                        title: const Text('slideshow').tr(),
-                        onTap: () {
-                          ctx.maybePop();
-                          final renderListAsync = ref.read(favoriteTimelineProvider);
-                          renderListAsync.whenData((renderList) {
-                            if (renderList.totalAssets > 0) {
-                              context.pushRoute(
-                                GalleryViewerRoute(
-                                  renderList: renderList,
-                                  initialIndex: 0,
-                                  isSlideshow: true,
-                                ),
-                              );
-                            }
-                          });
-                        },
-                      ),
+                      const Icon(Icons.slideshow_rounded),
+                      const SizedBox(width: 12),
+                      Text('slideshow').tr(),
                     ],
                   ),
                 ),
-              );
-            },
-          ),
+              ],
+            ),
         ],
       );
     }

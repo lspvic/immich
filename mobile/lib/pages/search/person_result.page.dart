@@ -21,6 +21,7 @@ class PersonResultPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = useState(personName);
+    final renderList = ref.watch(personAssetsProvider(personId));
 
     showEditNameDialog() {
       showDialog(
@@ -37,12 +38,13 @@ class PersonResultPage extends HookConsumerWidget {
     }
 
     void buildBottomSheet() {
+      final rl = renderList.value;
       showModalBottomSheet(
         backgroundColor: context.scaffoldBackgroundColor,
         isScrollControlled: false,
         context: context,
         useSafeArea: true,
-        builder: (ctx) {
+        builder: (context) {
           return SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -52,25 +54,15 @@ class PersonResultPage extends HookConsumerWidget {
                   title: const Text('edit_name', style: TextStyle(fontWeight: FontWeight.bold)).tr(),
                   onTap: showEditNameDialog,
                 ),
-                ListTile(
-                  leading: const Icon(Icons.slideshow_rounded),
-                  title: const Text('slideshow', style: TextStyle(fontWeight: FontWeight.bold)).tr(),
-                  onTap: () {
-                    ctx.maybePop();
-                    final renderListAsync = ref.read(personAssetsProvider(personId));
-                    renderListAsync.whenData((renderList) {
-                      if (renderList.totalAssets > 0) {
-                        context.pushRoute(
-                          GalleryViewerRoute(
-                            renderList: renderList,
-                            initialIndex: 0,
-                            isSlideshow: true,
-                          ),
-                        );
-                      }
-                    });
-                  },
-                ),
+                if (rl != null && rl.totalAssets > 0)
+                  ListTile(
+                    leading: const Icon(Icons.slideshow_rounded),
+                    title: const Text('slideshow', style: TextStyle(fontWeight: FontWeight.bold)).tr(),
+                    onTap: () {
+                      context.pop();
+                      context.pushRoute(SlideshowRoute(renderList: rl));
+                    },
+                  ),
               ],
             ),
           );
@@ -100,7 +92,9 @@ class PersonResultPage extends HookConsumerWidget {
       appBar: AppBar(
         title: Text(name.value),
         leading: IconButton(onPressed: () => context.maybePop(), icon: const Icon(Icons.arrow_back_ios_rounded)),
-        actions: [IconButton(onPressed: buildBottomSheet, icon: const Icon(Icons.more_vert_rounded))],
+        actions: [
+          IconButton(onPressed: buildBottomSheet, icon: const Icon(Icons.more_vert_rounded)),
+        ],
       ),
       body: MultiselectGrid(
         renderListProvider: personAssetsProvider(personId),

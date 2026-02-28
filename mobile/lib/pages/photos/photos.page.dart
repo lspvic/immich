@@ -30,6 +30,12 @@ class PhotosPage extends HookConsumerWidget {
     final tipOneOpacity = useState(0.0);
     final refreshCount = useState(0);
 
+    final renderListProvider =
+        timelineUsers.length > 1
+            ? multiUsersTimelineProvider(timelineUsers)
+            : singleUserTimelineProvider(currentUser?.id);
+    final renderList = ref.watch(renderListProvider);
+
     useEffect(() {
       ref.read(websocketProvider.notifier).connect();
       Future(() => ref.read(assetProvider.notifier).getAllAsset());
@@ -101,30 +107,11 @@ class PhotosPage extends HookConsumerWidget {
       }
     }
 
-    void startSlideshow() {
-      final renderListAsync = timelineUsers.length > 1
-          ? ref.read(multiUsersTimelineProvider(timelineUsers))
-          : ref.read(singleUserTimelineProvider(currentUser?.id));
-      renderListAsync.whenData((renderList) {
-        if (renderList.totalAssets > 0) {
-          context.pushRoute(
-            GalleryViewerRoute(
-              renderList: renderList,
-              initialIndex: 0,
-              isSlideshow: true,
-            ),
-          );
-        }
-      });
-    }
-
     return Stack(
       children: [
         MultiselectGrid(
           topWidget: (currentUser != null && currentUser.memoryEnabled) ? const MemoryLane() : const SizedBox(),
-          renderListProvider: timelineUsers.length > 1
-              ? multiUsersTimelineProvider(timelineUsers)
-              : singleUserTimelineProvider(currentUser?.id),
+          renderListProvider: renderListProvider,
           buildLoadingIndicator: buildLoadingIndicator,
           onRefresh: refreshAssets,
           stackEnabled: true,
@@ -140,13 +127,9 @@ class PhotosPage extends HookConsumerWidget {
             height: kToolbarHeight + context.padding.top,
             color: context.themeData.appBarTheme.backgroundColor,
             child: ImmichAppBar(
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.slideshow_rounded),
-                  onPressed: startSlideshow,
-                  tooltip: 'slideshow'.tr(),
-                ),
-              ],
+              onSlideshowPressed: (renderList.value != null && renderList.value!.totalAssets > 0)
+                  ? () => context.pushRoute(SlideshowRoute(renderList: renderList.value!))
+                  : null,
             ),
           ),
         ),

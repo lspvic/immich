@@ -19,8 +19,9 @@ class ImmichAppBar extends ConsumerWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
   final List<Widget>? actions;
   final bool showUploadButton;
+  final VoidCallback? onSlideshowPressed;
 
-  const ImmichAppBar({super.key, this.actions, this.showUploadButton = true});
+  const ImmichAppBar({super.key, this.actions, this.showUploadButton = true, this.onSlideshowPressed});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -160,6 +161,15 @@ class ImmichAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 showDialog(context: context, builder: (context) => const CastDialog());
               },
               icon: Icon(isCasting ? Icons.cast_connected_rounded : Icons.cast_rounded),
+            ),
+          ),
+        if (onSlideshowPressed != null)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: IconButton(
+              onPressed: onSlideshowPressed,
+              icon: const Icon(Icons.slideshow_rounded),
+              tooltip: 'slideshow'.tr(),
             ),
           ),
         if (showUploadButton) Padding(padding: const EdgeInsets.only(right: 20), child: buildBackupIndicator()),
