@@ -40,10 +40,13 @@ import 'package:immich_mobile/widgets/photo_view/src/utils/photo_view_hero_attri
 // ignore: must_be_immutable
 /// Expects [currentAssetProvider] to be set before navigating to this page
 class GalleryViewerPage extends HookConsumerWidget {
+  static const _slideshowInterval = Duration(seconds: 5);
+
   final int initialIndex;
   final int heroOffset;
   final bool showStack;
   final RenderList renderList;
+  final bool isSlideshow;
 
   GalleryViewerPage({
     super.key,
@@ -51,6 +54,7 @@ class GalleryViewerPage extends HookConsumerWidget {
     this.initialIndex = 0,
     this.heroOffset = 0,
     this.showStack = false,
+    this.isSlideshow = false,
   }) : controller = PageController(initialPage: initialIndex);
 
   final PageController controller;
@@ -139,6 +143,34 @@ class GalleryViewerPage extends HookConsumerWidget {
       }
       return null;
     }, [ref.watch(castProvider).isCasting]);
+
+    // Slideshow auto-advance logic
+    useEffect(() {
+      if (!isSlideshow) return null;
+      // Hide controls in slideshow mode
+      final controlsNotifier = ref.read(showControlsProvider.notifier);
+      controlsNotifier.show = false;
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+      final timer = Timer.periodic(_slideshowInterval, (_) {
+        final next = currentIndex.value + 1;
+        if (next < totalAssets.value) {
+          controller.animateToPage(
+            next,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+          );
+        } else {
+          if (context.mounted) {
+            context.maybePop();
+          }
+        }
+      });
+      return () {
+        timer.cancel();
+        controlsNotifier.show = true;
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      };
+    }, const []);
 
     void showInfo() {
       final asset = ref.read(currentAssetProvider);

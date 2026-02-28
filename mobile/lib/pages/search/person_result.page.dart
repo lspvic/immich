@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:immich_mobile/extensions/build_context_extensions.dart';
 import 'package:immich_mobile/presentation/widgets/images/remote_image_provider.dart';
 import 'package:immich_mobile/providers/search/people.provider.dart';
+import 'package:immich_mobile/routing/router.dart';
 import 'package:immich_mobile/widgets/search/person_name_edit_form.dart';
 import 'package:immich_mobile/widgets/asset_grid/multiselect_grid.dart';
 import 'package:immich_mobile/utils/image_url_builder.dart';
@@ -41,7 +42,7 @@ class PersonResultPage extends HookConsumerWidget {
         isScrollControlled: false,
         context: context,
         useSafeArea: true,
-        builder: (context) {
+        builder: (ctx) {
           return SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -50,6 +51,25 @@ class PersonResultPage extends HookConsumerWidget {
                   leading: const Icon(Icons.edit_outlined),
                   title: const Text('edit_name', style: TextStyle(fontWeight: FontWeight.bold)).tr(),
                   onTap: showEditNameDialog,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.slideshow_rounded),
+                  title: const Text('slideshow', style: TextStyle(fontWeight: FontWeight.bold)).tr(),
+                  onTap: () {
+                    ctx.maybePop();
+                    final renderListAsync = ref.read(personAssetsProvider(personId));
+                    renderListAsync.whenData((renderList) {
+                      if (renderList.totalAssets > 0) {
+                        context.pushRoute(
+                          GalleryViewerRoute(
+                            renderList: renderList,
+                            initialIndex: 0,
+                            isSlideshow: true,
+                          ),
+                        );
+                      }
+                    });
+                  },
                 ),
               ],
             ),

@@ -13,6 +13,7 @@ import 'package:immich_mobile/providers/server_info.provider.dart';
 import 'package:immich_mobile/providers/timeline.provider.dart';
 import 'package:immich_mobile/providers/user.provider.dart';
 import 'package:immich_mobile/providers/websocket.provider.dart';
+import 'package:immich_mobile/routing/router.dart';
 import 'package:immich_mobile/widgets/asset_grid/multiselect_grid.dart';
 import 'package:immich_mobile/widgets/common/immich_app_bar.dart';
 import 'package:immich_mobile/widgets/common/immich_loading_indicator.dart';
@@ -100,6 +101,23 @@ class PhotosPage extends HookConsumerWidget {
       }
     }
 
+    void startSlideshow() {
+      final renderListAsync = timelineUsers.length > 1
+          ? ref.read(multiUsersTimelineProvider(timelineUsers))
+          : ref.read(singleUserTimelineProvider(currentUser?.id));
+      renderListAsync.whenData((renderList) {
+        if (renderList.totalAssets > 0) {
+          context.pushRoute(
+            GalleryViewerRoute(
+              renderList: renderList,
+              initialIndex: 0,
+              isSlideshow: true,
+            ),
+          );
+        }
+      });
+    }
+
     return Stack(
       children: [
         MultiselectGrid(
@@ -121,7 +139,15 @@ class PhotosPage extends HookConsumerWidget {
           child: Container(
             height: kToolbarHeight + context.padding.top,
             color: context.themeData.appBarTheme.backgroundColor,
-            child: const ImmichAppBar(),
+            child: ImmichAppBar(
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.slideshow_rounded),
+                  onPressed: startSlideshow,
+                  tooltip: 'slideshow'.tr(),
+                ),
+              ],
+            ),
           ),
         ),
       ],
