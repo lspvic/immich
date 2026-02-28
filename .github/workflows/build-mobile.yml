@@ -32,6 +32,17 @@ on:
         required: true
       FASTLANE_TEAM_ID:
         required: true
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to build'
+        required: false
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'development'
+        type: string
   pull_request:
   push:
     branches: [main]
