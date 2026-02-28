@@ -26,6 +26,15 @@ enum _KenBurnsEffect { zoomIn, zoomOut, panLeft, panRight, panUp, panDown }
 /// Speed preset durations in seconds
 const Map<String, int> _speedPresets = {'slow': 8, 'medium': 5, 'fast': 3};
 
+/// Scale factor applied for Ken Burns zoom/pan effects
+const double _kenBurnsScaleAmount = 0.12;
+
+/// Fractional pan amount (relative to screen size) for Ken Burns pan effects
+const double _kenBurnsPanAmount = 0.06;
+
+/// Progress threshold at which the transition flash starts
+const double _flashStartThreshold = 0.92;
+
 @RoutePage()
 class SlideshowPage extends HookConsumerWidget {
   final RenderList renderList;
@@ -54,7 +63,7 @@ class SlideshowPage extends HookConsumerWidget {
 
     // Random order support
     final randomQueue = useState(<int>[]);
-    final randomIndexRef = useState(0);
+    final randomIndex = useState(0);
 
     // Ken Burns effect for current slide
     final currentEffect = useState(_KenBurnsEffect.zoomIn);
@@ -83,10 +92,10 @@ class SlideshowPage extends HookConsumerWidget {
         case SlideshowOrder.random:
           if (randomQueue.value.isEmpty) {
             randomQueue.value = buildRandomQueue(assets.length);
-            randomIndexRef.value = 0;
+            randomIndex.value = 0;
           }
-          final nextRndIdx = (randomIndexRef.value + 1) % randomQueue.value.length;
-          randomIndexRef.value = nextRndIdx;
+          final nextRndIdx = (randomIndex.value + 1) % randomQueue.value.length;
+          randomIndex.value = nextRndIdx;
           return randomQueue.value[nextRndIdx];
       }
     }
@@ -229,7 +238,7 @@ class SlideshowPage extends HookConsumerWidget {
                   order.value = o;
                   if (o == SlideshowOrder.random) {
                     randomQueue.value = buildRandomQueue(assets.length);
-                    randomIndexRef.value = 0;
+                    randomIndex.value = 0;
                   }
                   resetHideTimer();
                 },
@@ -290,48 +299,49 @@ class _KenBurnsSlide extends HookWidget {
       return null;
     }, [isPlaying]);
 
-    const double scaleAmount = 0.12;
-    const double panAmount = 0.06;
-
     late final Animation<double> scaleAnim;
     late final Animation<Offset> offsetAnim;
 
     switch (effect) {
       case _KenBurnsEffect.zoomIn:
-        scaleAnim = Tween<double>(begin: 1.0, end: 1.0 + scaleAmount).animate(
+        scaleAnim = Tween<double>(begin: 1.0, end: 1.0 + _kenBurnsScaleAmount).animate(
           CurvedAnimation(parent: controller, curve: Curves.easeInOut),
         );
         offsetAnim = AlwaysStoppedAnimation(Offset.zero);
         break;
       case _KenBurnsEffect.zoomOut:
-        scaleAnim = Tween<double>(begin: 1.0 + scaleAmount, end: 1.0).animate(
+        scaleAnim = Tween<double>(begin: 1.0 + _kenBurnsScaleAmount, end: 1.0).animate(
           CurvedAnimation(parent: controller, curve: Curves.easeInOut),
         );
         offsetAnim = AlwaysStoppedAnimation(Offset.zero);
         break;
       case _KenBurnsEffect.panLeft:
-        scaleAnim = AlwaysStoppedAnimation(1.0 + scaleAmount);
-        offsetAnim = Tween<Offset>(begin: const Offset(panAmount, 0), end: const Offset(-panAmount, 0)).animate(
-          CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-        );
+        scaleAnim = AlwaysStoppedAnimation(1.0 + _kenBurnsScaleAmount);
+        offsetAnim = Tween<Offset>(
+          begin: const Offset(_kenBurnsPanAmount, 0),
+          end: const Offset(-_kenBurnsPanAmount, 0),
+        ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
         break;
       case _KenBurnsEffect.panRight:
-        scaleAnim = AlwaysStoppedAnimation(1.0 + scaleAmount);
-        offsetAnim = Tween<Offset>(begin: const Offset(-panAmount, 0), end: const Offset(panAmount, 0)).animate(
-          CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-        );
+        scaleAnim = AlwaysStoppedAnimation(1.0 + _kenBurnsScaleAmount);
+        offsetAnim = Tween<Offset>(
+          begin: const Offset(-_kenBurnsPanAmount, 0),
+          end: const Offset(_kenBurnsPanAmount, 0),
+        ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
         break;
       case _KenBurnsEffect.panUp:
-        scaleAnim = AlwaysStoppedAnimation(1.0 + scaleAmount);
-        offsetAnim = Tween<Offset>(begin: const Offset(0, panAmount), end: const Offset(0, -panAmount)).animate(
-          CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-        );
+        scaleAnim = AlwaysStoppedAnimation(1.0 + _kenBurnsScaleAmount);
+        offsetAnim = Tween<Offset>(
+          begin: const Offset(0, _kenBurnsPanAmount),
+          end: const Offset(0, -_kenBurnsPanAmount),
+        ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
         break;
       case _KenBurnsEffect.panDown:
-        scaleAnim = AlwaysStoppedAnimation(1.0 + scaleAmount);
-        offsetAnim = Tween<Offset>(begin: const Offset(0, -panAmount), end: const Offset(0, panAmount)).animate(
-          CurvedAnimation(parent: controller, curve: Curves.easeInOut),
-        );
+        scaleAnim = AlwaysStoppedAnimation(1.0 + _kenBurnsScaleAmount);
+        offsetAnim = Tween<Offset>(
+          begin: const Offset(0, -_kenBurnsPanAmount),
+          end: const Offset(0, _kenBurnsPanAmount),
+        ).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
         break;
     }
 
@@ -371,9 +381,10 @@ class _SlideTransitionFlash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (progress <= 0.92) return const SizedBox.shrink();
+    if (progress <= _flashStartThreshold) return const SizedBox.shrink();
 
-    final ratio = ((progress - 0.92) / 0.08).clamp(0.0, 1.0);
+    final flashDuration = 1.0 - _flashStartThreshold;
+    final ratio = ((progress - _flashStartThreshold) / flashDuration).clamp(0.0, 1.0);
     final maxOpacity = switch (transition) {
       SlideshowTransition.fade => 0.7,
       SlideshowTransition.scale => 0.7,
