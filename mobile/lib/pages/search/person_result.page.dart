@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:immich_mobile/extensions/build_context_extensions.dart';
 import 'package:immich_mobile/presentation/widgets/images/remote_image_provider.dart';
 import 'package:immich_mobile/providers/search/people.provider.dart';
+import 'package:immich_mobile/routing/router.dart';
 import 'package:immich_mobile/widgets/search/person_name_edit_form.dart';
 import 'package:immich_mobile/widgets/asset_grid/multiselect_grid.dart';
 import 'package:immich_mobile/utils/image_url_builder.dart';
@@ -20,6 +21,7 @@ class PersonResultPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final name = useState(personName);
+    final renderList = ref.watch(personAssetsProvider(personId));
 
     showEditNameDialog() {
       showDialog(
@@ -80,7 +82,15 @@ class PersonResultPage extends HookConsumerWidget {
       appBar: AppBar(
         title: Text(name.value),
         leading: IconButton(onPressed: () => context.maybePop(), icon: const Icon(Icons.arrow_back_ios_rounded)),
-        actions: [IconButton(onPressed: buildBottomSheet, icon: const Icon(Icons.more_vert_rounded))],
+        actions: [
+          if (renderList.value != null && renderList.value!.totalAssets > 0)
+            IconButton(
+              onPressed: () => context.pushRoute(SlideshowRoute(renderList: renderList.value!)),
+              icon: const Icon(Icons.slideshow_rounded),
+              tooltip: 'slideshow'.tr(),
+            ),
+          IconButton(onPressed: buildBottomSheet, icon: const Icon(Icons.more_vert_rounded)),
+        ],
       ),
       body: MultiselectGrid(
         renderListProvider: personAssetsProvider(personId),

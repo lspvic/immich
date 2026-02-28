@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:immich_mobile/providers/multiselect.provider.dart';
 import 'package:immich_mobile/providers/timeline.provider.dart';
+import 'package:immich_mobile/routing/router.dart';
 import 'package:immich_mobile/widgets/asset_grid/multiselect_grid.dart';
 
 @RoutePage()
@@ -12,12 +13,22 @@ class FavoritesPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final renderList = ref.watch(favoriteTimelineProvider);
+
     AppBar buildAppBar() {
       return AppBar(
         leading: IconButton(onPressed: () => context.maybePop(), icon: const Icon(Icons.arrow_back_ios_rounded)),
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: const Text('favorites').tr(),
+        actions: [
+          if (renderList.value != null && renderList.value!.totalAssets > 0)
+            IconButton(
+              onPressed: () => context.pushRoute(SlideshowRoute(renderList: renderList.value!)),
+              icon: const Icon(Icons.slideshow_rounded),
+              tooltip: 'slideshow'.tr(),
+            ),
+        ],
       );
     }
 

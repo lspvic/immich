@@ -13,6 +13,7 @@ import 'package:immich_mobile/providers/server_info.provider.dart';
 import 'package:immich_mobile/providers/timeline.provider.dart';
 import 'package:immich_mobile/providers/user.provider.dart';
 import 'package:immich_mobile/providers/websocket.provider.dart';
+import 'package:immich_mobile/routing/router.dart';
 import 'package:immich_mobile/widgets/asset_grid/multiselect_grid.dart';
 import 'package:immich_mobile/widgets/common/immich_app_bar.dart';
 import 'package:immich_mobile/widgets/common/immich_loading_indicator.dart';
@@ -28,6 +29,12 @@ class PhotosPage extends HookConsumerWidget {
     final timelineUsers = ref.watch(timelineUsersIdsProvider);
     final tipOneOpacity = useState(0.0);
     final refreshCount = useState(0);
+
+    final renderListProvider =
+        timelineUsers.length > 1
+            ? multiUsersTimelineProvider(timelineUsers)
+            : singleUserTimelineProvider(currentUser?.id);
+    final renderList = ref.watch(renderListProvider);
 
     useEffect(() {
       ref.read(websocketProvider.notifier).connect();
@@ -104,9 +111,7 @@ class PhotosPage extends HookConsumerWidget {
       children: [
         MultiselectGrid(
           topWidget: (currentUser != null && currentUser.memoryEnabled) ? const MemoryLane() : const SizedBox(),
-          renderListProvider: timelineUsers.length > 1
-              ? multiUsersTimelineProvider(timelineUsers)
-              : singleUserTimelineProvider(currentUser?.id),
+          renderListProvider: renderListProvider,
           buildLoadingIndicator: buildLoadingIndicator,
           onRefresh: refreshAssets,
           stackEnabled: true,
@@ -121,10 +126,20 @@ class PhotosPage extends HookConsumerWidget {
           child: Container(
             height: kToolbarHeight + context.padding.top,
             color: context.themeData.appBarTheme.backgroundColor,
-            child: const ImmichAppBar(),
+            child: ImmichAppBar(
+              actions: [
+                if (renderList.value != null && renderList.value!.totalAssets > 0)
+                  IconButton(
+                    onPressed: () => context.pushRoute(SlideshowRoute(renderList: renderList.value!)),
+                    icon: const Icon(Icons.slideshow_rounded),
+                    tooltip: 'slideshow'.tr(),
+                  ),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 }
+

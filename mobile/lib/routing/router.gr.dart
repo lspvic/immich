@@ -1858,6 +1858,42 @@ class GalleryViewerRouteArgs {
 }
 
 /// generated route for
+/// [SlideshowPage]
+class SlideshowRoute extends PageRouteInfo<SlideshowRouteArgs> {
+  SlideshowRoute({
+    Key? key,
+    required RenderList renderList,
+    List<PageRouteInfo>? children,
+  }) : super(
+         SlideshowRoute.name,
+         args: SlideshowRouteArgs(key: key, renderList: renderList),
+         initialChildren: children,
+       );
+
+  static const String name = 'SlideshowRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<SlideshowRouteArgs>();
+      return SlideshowPage(key: args.key, renderList: args.renderList);
+    },
+  );
+}
+
+class SlideshowRouteArgs {
+  const SlideshowRouteArgs({this.key, required this.renderList});
+
+  final Key? key;
+  final RenderList renderList;
+
+  @override
+  String toString() {
+    return 'SlideshowRouteArgs{key: $key, renderList: $renderList}';
+  }
+}
+
+/// generated route for
 /// [HeaderSettingsPage]
 class HeaderSettingsRoute extends PageRouteInfo<void> {
   const HeaderSettingsRoute({List<PageRouteInfo>? children})

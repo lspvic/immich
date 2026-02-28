@@ -11,6 +11,7 @@ import 'package:immich_mobile/providers/activity_statistics.provider.dart';
 import 'package:immich_mobile/providers/album/album.provider.dart';
 import 'package:immich_mobile/providers/album/album_viewer.provider.dart';
 import 'package:immich_mobile/providers/album/current_album.provider.dart';
+import 'package:immich_mobile/providers/timeline.provider.dart';
 import 'package:immich_mobile/routing/router.dart';
 import 'package:immich_mobile/widgets/common/immich_toast.dart';
 
@@ -55,6 +56,7 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
     final isEditAlbum = albumViewer.isEditAlbum;
 
     final comments = album.shared ? ref.watch(activityStatisticsProvider(album.remoteId!)) : 0;
+    final albumTimeline = ref.watch(albumTimelineProvider(album.id));
 
     deleteAlbum() async {
       final bool success = await ref.watch(albumProvider.notifier).deleteAlbum(album);
@@ -187,6 +189,17 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
         ),
       ];
 
+      final slideshowActions = [
+        if (albumTimeline.value != null && albumTimeline.value!.totalAssets > 0)
+          ListTile(
+            leading: const Icon(Icons.slideshow_rounded),
+            onTap: () {
+              context.pop();
+              context.pushRoute(SlideshowRoute(renderList: albumTimeline.value!));
+            },
+            title: const Text("slideshow", style: TextStyle(fontWeight: FontWeight.w500)).tr(),
+          ),
+      ];
       final commonActions = [
         ListTile(
           leading: const Icon(Icons.add_photo_alternate_outlined),
@@ -212,6 +225,7 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
                 shrinkWrap: true,
                 children: [
                   ...buildBottomSheetActions(),
+                  ...slideshowActions,
                   if (onAddPhotos != null) ...commonActions,
                   if (onAddPhotos != null && userId == album.ownerId) ...ownerActions,
                 ],
