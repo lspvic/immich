@@ -22,15 +22,15 @@ class FavoritesPage extends HookConsumerWidget {
         automaticallyImplyLeading: false,
         title: const Text('favorites').tr(),
         actions: [
-          if (renderList.value != null && renderList.value!.totalAssets > 0)
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded),
-              onSelected: (value) {
-                if (value == 'slideshow') {
-                  context.pushRoute(SlideshowRoute(renderList: renderList.value!));
-                }
-              },
-              itemBuilder: (_) => [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) {
+              if (value == 'slideshow' && renderList.value != null) {
+                context.pushRoute(SlideshowRoute(renderList: renderList.value!));
+              }
+            },
+            itemBuilder: (_) => [
+              if (renderList.value != null && renderList.value!.totalAssets > 0)
                 PopupMenuItem(
                   value: 'slideshow',
                   child: Row(
@@ -41,8 +41,8 @@ class FavoritesPage extends HookConsumerWidget {
                     ],
                   ),
                 ),
-              ],
-            ),
+            ],
+          ),
         ],
       );
     }
