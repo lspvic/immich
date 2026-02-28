@@ -38,6 +38,7 @@ class PersonResultPage extends HookConsumerWidget {
     }
 
     void buildBottomSheet() {
+      final rl = renderList.value;
       showModalBottomSheet(
         backgroundColor: context.scaffoldBackgroundColor,
         isScrollControlled: false,
@@ -53,6 +54,15 @@ class PersonResultPage extends HookConsumerWidget {
                   title: const Text('edit_name', style: TextStyle(fontWeight: FontWeight.bold)).tr(),
                   onTap: showEditNameDialog,
                 ),
+                if (rl != null && rl.totalAssets > 0)
+                  ListTile(
+                    leading: const Icon(Icons.slideshow_rounded),
+                    title: const Text('slideshow', style: TextStyle(fontWeight: FontWeight.bold)).tr(),
+                    onTap: () {
+                      context.pop();
+                      context.pushRoute(SlideshowRoute(renderList: rl));
+                    },
+                  ),
               ],
             ),
           );
@@ -83,12 +93,6 @@ class PersonResultPage extends HookConsumerWidget {
         title: Text(name.value),
         leading: IconButton(onPressed: () => context.maybePop(), icon: const Icon(Icons.arrow_back_ios_rounded)),
         actions: [
-          if (renderList.value != null && renderList.value!.totalAssets > 0)
-            IconButton(
-              onPressed: () => context.pushRoute(SlideshowRoute(renderList: renderList.value!)),
-              icon: const Icon(Icons.slideshow_rounded),
-              tooltip: 'slideshow'.tr(),
-            ),
           IconButton(onPressed: buildBottomSheet, icon: const Icon(Icons.more_vert_rounded)),
         ],
       ),

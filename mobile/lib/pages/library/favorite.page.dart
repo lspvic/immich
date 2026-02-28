@@ -23,10 +23,25 @@ class FavoritesPage extends HookConsumerWidget {
         title: const Text('favorites').tr(),
         actions: [
           if (renderList.value != null && renderList.value!.totalAssets > 0)
-            IconButton(
-              onPressed: () => context.pushRoute(SlideshowRoute(renderList: renderList.value!)),
-              icon: const Icon(Icons.slideshow_rounded),
-              tooltip: 'slideshow'.tr(),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded),
+              onSelected: (value) {
+                if (value == 'slideshow') {
+                  context.pushRoute(SlideshowRoute(renderList: renderList.value!));
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'slideshow',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.slideshow_rounded),
+                      const SizedBox(width: 12),
+                      Text('slideshow').tr(),
+                    ],
+                  ),
+                ),
+              ],
             ),
         ],
       );

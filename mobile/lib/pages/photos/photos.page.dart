@@ -127,14 +127,9 @@ class PhotosPage extends HookConsumerWidget {
             height: kToolbarHeight + context.padding.top,
             color: context.themeData.appBarTheme.backgroundColor,
             child: ImmichAppBar(
-              actions: [
-                if (renderList.value != null && renderList.value!.totalAssets > 0)
-                  IconButton(
-                    onPressed: () => context.pushRoute(SlideshowRoute(renderList: renderList.value!)),
-                    icon: const Icon(Icons.slideshow_rounded),
-                    tooltip: 'slideshow'.tr(),
-                  ),
-              ],
+              onSlideshowPressed: (renderList.value != null && renderList.value!.totalAssets > 0)
+                  ? () => context.pushRoute(SlideshowRoute(renderList: renderList.value!))
+                  : null,
             ),
           ),
         ),
