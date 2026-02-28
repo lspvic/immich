@@ -11,6 +11,7 @@ import 'package:immich_mobile/providers/activity_statistics.provider.dart';
 import 'package:immich_mobile/providers/album/album.provider.dart';
 import 'package:immich_mobile/providers/album/album_viewer.provider.dart';
 import 'package:immich_mobile/providers/album/current_album.provider.dart';
+import 'package:immich_mobile/providers/timeline.provider.dart';
 import 'package:immich_mobile/routing/router.dart';
 import 'package:immich_mobile/widgets/common/immich_toast.dart';
 
@@ -200,6 +201,26 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
           title: const Text("add_photos", style: TextStyle(fontWeight: FontWeight.w500)).tr(),
         ),
       ];
+
+      final slideshowAction = ListTile(
+        leading: const Icon(Icons.slideshow_rounded),
+        title: const Text('slideshow', style: TextStyle(fontWeight: FontWeight.w500)).tr(),
+        onTap: () {
+          context.pop();
+          final renderListAsync = ref.read(albumTimelineProvider(album.id));
+          renderListAsync.whenData((renderList) {
+            if (renderList.totalAssets > 0) {
+              context.pushRoute(
+                GalleryViewerRoute(
+                  renderList: renderList,
+                  initialIndex: 0,
+                  isSlideshow: true,
+                ),
+              );
+            }
+          });
+        },
+      );
       showModalBottomSheet(
         backgroundColor: context.scaffoldBackgroundColor,
         isScrollControlled: false,
@@ -212,6 +233,7 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
                 shrinkWrap: true,
                 children: [
                   ...buildBottomSheetActions(),
+                  slideshowAction,
                   if (onAddPhotos != null) ...commonActions,
                   if (onAddPhotos != null && userId == album.ownerId) ...ownerActions,
                 ],

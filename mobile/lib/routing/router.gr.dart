@@ -1802,6 +1802,7 @@ class GalleryViewerRoute extends PageRouteInfo<GalleryViewerRouteArgs> {
     int initialIndex = 0,
     int heroOffset = 0,
     bool showStack = false,
+    bool isSlideshow = false,
     List<PageRouteInfo>? children,
   }) : super(
          GalleryViewerRoute.name,
@@ -1811,6 +1812,7 @@ class GalleryViewerRoute extends PageRouteInfo<GalleryViewerRouteArgs> {
            initialIndex: initialIndex,
            heroOffset: heroOffset,
            showStack: showStack,
+           isSlideshow: isSlideshow,
          ),
          initialChildren: children,
        );
@@ -1827,6 +1829,7 @@ class GalleryViewerRoute extends PageRouteInfo<GalleryViewerRouteArgs> {
         initialIndex: args.initialIndex,
         heroOffset: args.heroOffset,
         showStack: args.showStack,
+        isSlideshow: args.isSlideshow,
       );
     },
   );
@@ -1839,6 +1842,7 @@ class GalleryViewerRouteArgs {
     this.initialIndex = 0,
     this.heroOffset = 0,
     this.showStack = false,
+    this.isSlideshow = false,
   });
 
   final Key? key;
@@ -1851,9 +1855,11 @@ class GalleryViewerRouteArgs {
 
   final bool showStack;
 
+  final bool isSlideshow;
+
   @override
   String toString() {
-    return 'GalleryViewerRouteArgs{key: $key, renderList: $renderList, initialIndex: $initialIndex, heroOffset: $heroOffset, showStack: $showStack}';
+    return 'GalleryViewerRouteArgs{key: $key, renderList: $renderList, initialIndex: $initialIndex, heroOffset: $heroOffset, showStack: $showStack, isSlideshow: $isSlideshow}';
   }
 }
 
