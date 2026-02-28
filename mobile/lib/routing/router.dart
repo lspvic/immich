@@ -41,6 +41,7 @@ import 'package:immich_mobile/pages/common/gallery_viewer.page.dart';
 import 'package:immich_mobile/pages/common/headers_settings.page.dart';
 import 'package:immich_mobile/pages/common/native_video_viewer.page.dart';
 import 'package:immich_mobile/pages/common/settings.page.dart';
+import 'package:immich_mobile/pages/common/slideshow.page.dart';
 import 'package:immich_mobile/pages/common/splash_screen.page.dart';
 import 'package:immich_mobile/pages/common/tab_controller.page.dart';
 import 'package:immich_mobile/pages/common/tab_shell.page.dart';
@@ -193,6 +194,7 @@ class AppRouter extends RootStackRouter {
       guards: [_authGuard, _galleryGuard],
       transitionsBuilder: CustomTransitionsBuilders.zoomedPage,
     ),
+    AutoRoute(page: SlideshowRoute.page, guards: [_authGuard, _duplicateGuard]),
     AutoRoute(page: BackupControllerRoute.page, guards: [_authGuard, _duplicateGuard, _backupPermissionGuard]),
     AutoRoute(page: AllPlacesRoute.page, guards: [_authGuard, _duplicateGuard]),
     AutoRoute(page: CreateAlbumRoute.page, guards: [_authGuard, _duplicateGuard]),

@@ -56,6 +56,7 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
     final isEditAlbum = albumViewer.isEditAlbum;
 
     final comments = album.shared ? ref.watch(activityStatisticsProvider(album.remoteId!)) : 0;
+    final albumTimeline = ref.watch(albumTimelineProvider(album.id));
 
     deleteAlbum() async {
       final bool success = await ref.watch(albumProvider.notifier).deleteAlbum(album);
@@ -202,25 +203,17 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
         ),
       ];
 
-      final slideshowAction = ListTile(
-        leading: const Icon(Icons.slideshow_rounded),
-        title: const Text('slideshow', style: TextStyle(fontWeight: FontWeight.w500)).tr(),
-        onTap: () {
-          context.pop();
-          final renderListAsync = ref.read(albumTimelineProvider(album.id));
-          renderListAsync.whenData((renderList) {
-            if (renderList.totalAssets > 0) {
-              context.pushRoute(
-                GalleryViewerRoute(
-                  renderList: renderList,
-                  initialIndex: 0,
-                  isSlideshow: true,
-                ),
-              );
-            }
-          });
-        },
-      );
+      final slideshowActions = [
+        if (albumTimeline.value != null && albumTimeline.value!.totalAssets > 0)
+          ListTile(
+            leading: const Icon(Icons.slideshow_rounded),
+            onTap: () {
+              context.pop();
+              context.pushRoute(SlideshowRoute(renderList: albumTimeline.value!));
+            },
+            title: const Text("slideshow", style: TextStyle(fontWeight: FontWeight.w500)).tr(),
+          ),
+      ];
       showModalBottomSheet(
         backgroundColor: context.scaffoldBackgroundColor,
         isScrollControlled: false,
@@ -233,7 +226,7 @@ class AlbumViewerAppbar extends HookConsumerWidget implements PreferredSizeWidge
                 shrinkWrap: true,
                 children: [
                   ...buildBottomSheetActions(),
-                  slideshowAction,
+                  ...slideshowActions,
                   if (onAddPhotos != null) ...commonActions,
                   if (onAddPhotos != null && userId == album.ownerId) ...ownerActions,
                 ],
