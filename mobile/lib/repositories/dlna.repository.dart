@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dlna_dart/dlna.dart';
+import 'package:dlna_dart/xmlParser.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final dlnaRepositoryProvider = Provider((_) => DlnaRepository());
