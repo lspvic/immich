@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-enum CastDestinationType { googleCast }
+enum CastDestinationType { googleCast, dlna }
 
 enum CastState { idle, playing, paused, buffering }
 

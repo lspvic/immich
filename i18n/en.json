@@ -1237,6 +1237,8 @@
   "full_path": "Full path: {path}",
   "gcast_enabled": "Google Cast",
   "gcast_enabled_description": "This feature loads external resources from Google in order to work.",
+  "dlna_enabled": "DLNA",
+  "dlna_enabled_description": "Cast to DLNA/UPnP compatible devices on your local network.",
   "general": "General",
   "geolocation_instruction_location": "Click on an asset with GPS coordinates to use its location, or select a location directly from the map",
   "get_help": "Get Help",
