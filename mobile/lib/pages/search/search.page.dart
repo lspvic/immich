@@ -34,6 +34,7 @@ class SearchPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textSearchType = useState<TextSearchType>(TextSearchType.context);
     final searchHintText = useState<String>('sunrise_on_the_beach'.tr());
+    final searchRenderList = ref.watch(paginatedSearchRenderListProvider);
     final textSearchController = useTextEditingController();
     final filter = useState<SearchFilter>(
       SearchFilter(
@@ -444,6 +445,28 @@ class SearchPage extends HookConsumerWidget {
                 );
               },
               menuChildren: [
+                MenuItemButton(
+                  child: ListTile(
+                    leading: const Icon(Icons.slideshow_rounded),
+                    title: Text(
+                      'slideshow'.tr(),
+                      style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  onPressed: () {
+                    final rl = searchRenderList.value;
+                    if (rl != null && rl.totalAssets > 0) {
+                      context.pushRoute(SlideshowRoute(renderList: rl));
+                    } else {
+                      context.showSnackBar(
+                        SnackBar(
+                          content: Text('no_assets_to_slideshow'.tr()),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                ),
                 MenuItemButton(
                   child: ListTile(
                     leading: const Icon(Icons.image_search_rounded),

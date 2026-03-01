@@ -1585,6 +1585,7 @@
   "no_archived_assets_message": "归档照片和视频以便在照片视图中隐藏它们",
   "no_assets_message": "点击此处上传你的第一张照片",
   "no_assets_to_show": "没有要显示的资产",
+  "no_assets_to_slideshow": "没有可用资产来播放幻灯片",
   "no_cast_devices_found": "未找到投放设备",
   "no_checksum_local": "没有可用的校验和-无法获取本地资产",
   "no_checksum_remote": "没有可用的校验和-无法获取远程资产",

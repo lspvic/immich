@@ -173,6 +173,16 @@ class ImmichAppBar extends ConsumerWidget implements PreferredSizeWidget {
             ),
           ),
         if (showUploadButton) Padding(padding: const EdgeInsets.only(right: 20), child: buildBackupIndicator()),
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: Chip(
+            backgroundColor: Colors.redAccent,
+            label: Text(
+              '${context.locale.toLanguageTag()} DEV',
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ),
+        ),
         Padding(padding: const EdgeInsets.only(right: 20), child: buildProfileIndicator()),
       ],
     );

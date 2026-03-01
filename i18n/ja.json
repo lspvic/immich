@@ -1585,6 +1585,7 @@
   "no_archived_assets_message": "写真や動画をアーカイブして、写真一覧から非表示にします",
   "no_assets_message": "クリックして最初の写真をアップロード",
   "no_assets_to_show": "表示する項目がありません",
+  "no_assets_to_slideshow": "スライドショーを再生できる資産がありません",
   "no_cast_devices_found": "キャスト先のデバイスが見つかりません",
   "no_checksum_local": "チェックサムが見つかりません - デバイス上の項目を取得できないようです",
   "no_checksum_remote": "チェックサムが見つかりません - サーバー上の項目を取得できないようです",

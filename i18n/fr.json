@@ -1591,6 +1591,7 @@
   "no_archived_assets_message": "Archiver des photos et vidéos pour les masquer dans votre bibliothèque",
   "no_assets_message": "Cliquez pour envoyer votre première photo",
   "no_assets_to_show": "Aucun élément à afficher",
+  "no_assets_to_slideshow": "Aucun élément disponible pour le diaporama",
   "no_cast_devices_found": "Aucun appareil de diffusion trouvé",
   "no_checksum_local": "Aucune empreinte numerique disponible - impossible de récupérer les médias locaux",
   "no_checksum_remote": "Aucune empreinte numérique disponible - impossible de récupérer les médias distants",

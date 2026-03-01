@@ -1585,6 +1585,7 @@
   "no_archived_assets_message": "Archiviere Fotos und Videos, um sie aus deiner Fotoansicht zu entfernen",
   "no_assets_message": "Klicke, um dein erstes Foto hochzuladen",
   "no_assets_to_show": "Keine Vorschau vorhanden",
+  "no_assets_to_slideshow": "Keine Ressourcen zum Abspielen der Diashow verfügbar",
   "no_cast_devices_found": "Keine Geräte zum Übertragen gefunden",
   "no_checksum_local": "Prüfsumme nicht verfügbar - kann lokale Datei/en nicht laden",
   "no_checksum_remote": "Prüfsumme nicht verfügbar - kann entfernte Datei/en nicht laden",

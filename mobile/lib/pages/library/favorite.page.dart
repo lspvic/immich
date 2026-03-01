@@ -22,27 +22,36 @@ class FavoritesPage extends HookConsumerWidget {
         automaticallyImplyLeading: false,
         title: const Text('favorites').tr(),
         actions: [
-          if (renderList.value != null && renderList.value!.totalAssets > 0)
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded),
-              onSelected: (value) {
-                if (value == 'slideshow') {
-                  context.pushRoute(SlideshowRoute(renderList: renderList.value!));
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) {
+              if (value == 'slideshow') {
+                final rl = renderList.value;
+                if (rl != null && rl.totalAssets > 0) {
+                  context.pushRoute(SlideshowRoute(renderList: rl));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('no_assets_to_slideshow'.tr()),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
                 }
-              },
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  value: 'slideshow',
-                  child: Row(
-                    children: [
-                      const Icon(Icons.slideshow_rounded),
-                      const SizedBox(width: 12),
-                      Text('slideshow').tr(),
-                    ],
-                  ),
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'slideshow',
+                child: Row(
+                  children: [
+                    const Icon(Icons.slideshow_rounded),
+                    const SizedBox(width: 12),
+                    Text('slideshow').tr(),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ],
       );
     }

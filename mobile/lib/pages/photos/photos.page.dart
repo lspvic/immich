@@ -127,9 +127,19 @@ class PhotosPage extends HookConsumerWidget {
             height: kToolbarHeight + context.padding.top,
             color: context.themeData.appBarTheme.backgroundColor,
             child: ImmichAppBar(
-              onSlideshowPressed: (renderList.value != null && renderList.value!.totalAssets > 0)
-                  ? () => context.pushRoute(SlideshowRoute(renderList: renderList.value!))
-                  : null,
+              onSlideshowPressed: () {
+                final rl = renderList.value;
+                if (rl != null && rl.totalAssets > 0) {
+                  context.pushRoute(SlideshowRoute(renderList: rl));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('no_assets_to_slideshow'.tr()),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
             ),
           ),
         ),
