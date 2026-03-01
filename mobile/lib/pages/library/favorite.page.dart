@@ -30,7 +30,7 @@ class FavoritesPage extends HookConsumerWidget {
                 if (rl != null && rl.totalAssets > 0) {
                   context.pushRoute(SlideshowRoute(renderList: rl));
                 } else {
-                  context.showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('no_assets_to_slideshow'.tr()),
                       duration: const Duration(seconds: 2),
