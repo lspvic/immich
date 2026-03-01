@@ -1591,6 +1591,7 @@
   "no_archived_assets_message": "Archive fotos y videos para ocultarlos de su vista de Fotos",
   "no_assets_message": "Haz clic para subir tu primera foto",
   "no_assets_to_show": "No hay recursos a mostrar",
+  "no_assets_to_slideshow": "No hay recursos disponibles para reproducir la presentación de diapositivas",
   "no_cast_devices_found": "No se encontraron dispositivos de transmisión",
   "no_checksum_local": "Suma de verificación no disponible. No se pueden obtener los recursos locales",
   "no_checksum_remote": "Suma de verificación no disponible. No se puede obtener el recurso remoto",

@@ -1597,6 +1597,7 @@
   "no_archived_assets_message": "Archive photos and videos to hide them from your Photos view",
   "no_assets_message": "Click to upload your first photo",
   "no_assets_to_show": "No assets to show",
+  "no_assets_to_slideshow": "No assets available to play slideshow",
   "no_cast_devices_found": "No cast devices found",
   "no_checksum_local": "No checksum available - cannot fetch local assets",
   "no_checksum_remote": "No checksum available - cannot fetch remote asset",

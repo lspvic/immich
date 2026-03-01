@@ -445,20 +445,28 @@ class SearchPage extends HookConsumerWidget {
                 );
               },
               menuChildren: [
-                if (searchRenderList.value != null && searchRenderList.value!.totalAssets > 0)
-                  MenuItemButton(
-                    child: ListTile(
-                      leading: const Icon(Icons.slideshow_rounded),
-                      title: Text(
-                        'slideshow'.tr(),
-                        style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
-                      ),
+                MenuItemButton(
+                  child: ListTile(
+                    leading: const Icon(Icons.slideshow_rounded),
+                    title: Text(
+                      'slideshow'.tr(),
+                      style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
                     ),
-                    onPressed: () {
-                      final rl = searchRenderList.value;
-                      if (rl != null) context.pushRoute(SlideshowRoute(renderList: rl));
-                    },
                   ),
+                  onPressed: () {
+                    final rl = searchRenderList.value;
+                    if (rl != null && rl.totalAssets > 0) {
+                      context.pushRoute(SlideshowRoute(renderList: rl));
+                    } else {
+                      context.showSnackBar(
+                        SnackBar(
+                          content: Text('no_assets_to_slideshow'.tr()),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                ),
                 MenuItemButton(
                   child: ListTile(
                     leading: const Icon(Icons.image_search_rounded),
